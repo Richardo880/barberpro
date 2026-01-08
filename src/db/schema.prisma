@@ -1,0 +1,274 @@
+// Prisma Schema para BarberPro
+// PostgreSQL Database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USUARIOS Y AUTENTICACIÓN
+// ============================================
+
+enum Role {
+  CLIENT  // Cliente regular
+  STAFF   // Barbero/empleado
+  ADMIN   // Administrador
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    // bcrypt hash
+  role          Role      @default(CLIENT)
+
+  name          String
+  phone         String?
+  birthDate     DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones
+  clientProfile   ClientProfile?
+  staffProfile    StaffProfile?
+  appointments    Appointment[]   @relation("ClientAppointments")
+  staffAppointments Appointment[] @relation("StaffAppointments")
+  records         HaircutRecord[] @relation("ClientRecords")
+  staffRecords    HaircutRecord[] @relation("StaffRecords")
+  auditLogs       AuditLog[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// Perfil extendido para clientes
+model ClientProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  internalNotes   String?  // Solo visible para admin/staff
+  tags            String[] // Ej: ["VIP", "frequent"]
+  preferredStaffId String? // Barbero preferido
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("client_profiles")
+}
+
+// Perfil extendido para staff/barberos
+model StaffProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bio           String?
+  photoUrl      String?
+  specialties   String[]  // Ej: ["fade", "barba", "diseño"]
+  isActive      Boolean   @default(true)
+
+  // Servicios que puede realizar (many-to-many)
+  services      Service[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("staff_profiles")
+}
+
+// ============================================
+// SERVICIOS
+// ============================================
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String   @unique // Ej: "Corte Clásico", "Fade", "Barba"
+  description String?
+  duration    Int      // Duración en minutos
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?  // URL de imagen de referencia del servicio
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  staff           StaffProfile[]
+  appointments    Appointment[]
+  records         HaircutRecord[]
+
+  @@map("services")
+}
+
+// ============================================
+// RESERVAS / TURNOS
+// ============================================
+
+enum AppointmentStatus {
+  PENDING    // Pendiente de confirmación
+  CONFIRMED  // Confirmado
+  COMPLETED  // Atendido
+  CANCELLED  // Cancelado
+  NO_SHOW    // Cliente no se presentó
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+
+  // Fecha y hora
+  startTime     DateTime
+  endTime       DateTime
+
+  // Relaciones
+  clientId      String
+  client        User              @relation("ClientAppointments", fields: [clientId], references: [id])
+
+  serviceId     String
+  service       Service           @relation(fields: [serviceId], references: [id])
+
+  staffId       String?           // Opcional: cliente puede no elegir barbero
+  staff         User?             @relation("StaffAppointments", fields: [staffId], references: [id])
+
+  // Estado
+  status        AppointmentStatus @default(PENDING)
+
+  // Notas
+  clientNotes   String?           // Notas del cliente
+  staffNotes    String?           // Notas del staff (solo admin/staff ven)
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([clientId])
+  @@index([staffId])
+  @@index([startTime])
+  @@index([status])
+  @@map("appointments")
+}
+
+// ============================================
+// HISTORIAL DE CORTES
+// ============================================
+
+model HaircutRecord {
+  id          String   @id @default(cuid())
+
+  // Relaciones
+  clientId    String
+  client      User     @relation("ClientRecords", fields: [clientId], references: [id])
+
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+
+  staffId     String?
+  staff       User?    @relation("StaffRecords", fields: [staffId], references: [id])
+
+  // Detalles del servicio realizado
+  date        DateTime
+  price       Decimal  @db.Decimal(10, 2) // Precio en ese momento (puede diferir del servicio)
+  notes       String?  // Notas del barbero
+  tags        String[] // Ej: ["fade alto", "diseño estrella"]
+  photoUrls   String[] // URLs de fotos del resultado
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([staffId])
+  @@index([date])
+  @@map("haircut_records")
+}
+
+// ============================================
+// CONFIGURACIÓN DE HORARIOS Y CIERRES
+// ============================================
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+// Horarios de atención por día de la semana
+model BusinessHours {
+  id          String    @id @default(cuid())
+  dayOfWeek   DayOfWeek @unique
+  isOpen      Boolean   @default(true)
+  openTime    String    // Formato "HH:mm" (ej: "09:00")
+  closeTime   String    // Formato "HH:mm" (ej: "18:00")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("business_hours")
+}
+
+// Cierres excepcionales (feriados, vacaciones, etc.)
+model Closure {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  reason      String?  // Ej: "Feriado Nacional", "Vacaciones"
+  isAllDay    Boolean  @default(true)
+  startTime   String?  // Solo si isAllDay = false
+  endTime     String?  // Solo si isAllDay = false
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date])
+  @@map("closures")
+}
+
+// ============================================
+// AUDITORÍA
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  action      String   // Ej: "CREATE_APPOINTMENT", "UPDATE_CLIENT", "CANCEL_APPOINTMENT"
+  entity      String   // Ej: "Appointment", "User", "Service"
+  entityId    String
+
+  before      Json?    // Estado anterior (JSON)
+  after       Json?    // Estado nuevo (JSON)
+
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
+
+// ============================================
+// CONFIGURACIÓN GLOBAL
+// ============================================
+
+model AppConfig {
+  id                String   @id @default(cuid())
+  key               String   @unique // Ej: "buffer_time_minutes", "max_advance_booking_days"
+  value             String   // Valor en string, parsear según tipo
+  type              String   // "number", "string", "boolean"
+  description       String?
+
+  updatedAt         DateTime @updatedAt
+
+  @@map("app_config")
+}
