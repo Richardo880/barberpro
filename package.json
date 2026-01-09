@@ -5,7 +5,7 @@
   "description": "Sistema de gestión completo para barberías - Next.js 15 + TypeScript + PostgreSQL",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema=src/db/schema.prisma && prisma migrate deploy --schema=src/db/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
