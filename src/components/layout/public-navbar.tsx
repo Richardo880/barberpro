@@ -13,8 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Menu, LogOut, Calendar, Settings } from "lucide-react";
+import { Menu, LogOut, Calendar, Settings, Shield } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function PublicNavbar() {
   const { user, isAuthenticated, role } = useAuth();
@@ -71,6 +72,7 @@ export function PublicNavbar() {
 
           {/* Auth Buttons / User Menu */}
           <div className="flex items-center space-x-4">
+            <ThemeToggle variant="navbar" />
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -92,8 +94,17 @@ export function PublicNavbar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href={getDashboardLink()} className="flex items-center">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      <span>Mis Turnos</span>
+                      {role === "ADMIN" || role === "STAFF" ? (
+                        <>
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Panel de Admin</span>
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="mr-2 h-4 w-4" />
+                          <span>Mis Turnos</span>
+                        </>
+                      )}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

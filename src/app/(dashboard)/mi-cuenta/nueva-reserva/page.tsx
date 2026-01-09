@@ -172,43 +172,53 @@ export default function NuevaReservaPage() {
               {services.map((service) => (
                 <Card
                   key={service.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${state.serviceId === service.id ? "ring-2 ring-primary" : ""
+                  className={`cursor-pointer transition-all hover:shadow-md overflow-hidden ${state.serviceId === service.id ? "ring-2 ring-primary" : ""
                     }`}
                   onClick={() => handleServiceSelect(service.id)}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Scissors className="h-5 w-5 text-primary" />
-                          <h3 className="font-semibold">{service.name}</h3>
-                          {service.imageUrl ? (
-                            <img
-                              src={service.imageUrl}
-                              alt={service.name}
-                              className="relative h-48 w-full overflow-hidden bg-muted object-cover object-center rounded-md ml-auto"
-                            />
-                          ) : null}
-                          
-                        </div>
-                        {service.description && (
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {service.description}
-                          </p>
-                        )}
-                        <div className="mt-3 flex items-center gap-3 text-sm">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {service.duration} min
-                          </span>
-                          <span className="font-semibold text-primary">
-                            ₲ {service.price.toLocaleString("es-PY")}
-                          </span>
-                        </div>
+                  {/* Imagen del servicio */}
+                  <div className="relative h-40 w-full bg-muted">
+                    {service.imageUrl ? (
+                      <img
+                        src={service.imageUrl}
+                        alt={service.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <Scissors className="h-12 w-12 text-muted-foreground/50" />
                       </div>
-                      {state.serviceId === service.id && (
-                        <Check className="h-5 w-5 text-primary" />
-                      )}
+                    )}
+                    {state.serviceId === service.id && (
+                      <div className="absolute top-2 right-2 rounded-full bg-primary p-1">
+                        <Check className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+
+                  <CardContent className="p-4">
+                    {/* Título */}
+                    <div className="flex items-center gap-2">
+                      <Scissors className="h-4 w-4 text-primary" />
+                      <h3 className="font-semibold">{service.name}</h3>
+                    </div>
+
+                    {/* Descripción */}
+                    {service.description && (
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                        {service.description}
+                      </p>
+                    )}
+
+                    {/* Duración y Precio */}
+                    <div className="mt-3 flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        {service.duration} min
+                      </span>
+                      <span className="font-semibold text-primary">
+                        ₲ {service.price.toLocaleString("es-PY")}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>

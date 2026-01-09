@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Home, LogOut, Settings, Shield } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function DashboardNavbar() {
   const { user, role } = useAuth();
@@ -31,11 +32,11 @@ export function DashboardNavbar() {
   const isAdmin = role === "ADMIN" || role === "STAFF";
 
   return (
-    <nav className="border-b bg-white">
+    <nav className="border-b bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href={isAdmin ? "/admin" : "/mi-cuenta"} className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <span className="font-bold">BP</span>
             </div>
@@ -44,6 +45,7 @@ export function DashboardNavbar() {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">

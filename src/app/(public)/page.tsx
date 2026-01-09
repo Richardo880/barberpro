@@ -138,8 +138,11 @@ export default function HomePage() {
       </section>
 
       {/* Staff Preview - Solo 3 barberos */}
-      <section className="bg-[url('/images/menu/bg-image.png')] relative py-16 sm:py-24 bg-gradient-to-b from-stone-100 to-stone-200 transition-all duration-700 ease-in-out">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative bg-[url('/images/menu/bg-image.png')] bg-cover bg-center bg-fixed py-16 sm:py-24 transition-all duration-700 ease-in-out">
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center mx-auto max-w-2xl bg-gradient-to-br from-stone-900/90 to-stone-950/90 backdrop-blur-sm p-10 rounded-xl shadow-2xl border border-stone-700/40">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-stone-100">
               Nuestro Equipo
@@ -150,9 +153,9 @@ export default function HomePage() {
           </div>
 
           {staffLoading ? (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-wrap justify-center gap-8">
               {[...Array(3)].map((_, i) => (
-                <Card key={i} className="overflow-hidden bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40">
+                <Card key={i} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] overflow-hidden bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40">
                   <CardContent className="p-6">
                     <div className="animate-pulse space-y-4">
                       <div className="mx-auto h-24 w-24 rounded-full bg-stone-800/50" />
@@ -164,9 +167,9 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-wrap justify-center gap-8">
               {staff.map((member) => (
-                <Card key={member.id} className="overflow-hidden bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <Card key={member.id} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] overflow-hidden bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
                   <CardContent className="p-6 text-center">
                     <Avatar className="mx-auto h-24 w-24 border-4 border-yellow-700/50 shadow-lg">
                       <AvatarImage src={member.photoUrl || undefined} />
@@ -193,7 +196,7 @@ export default function HomePage() {
 
           {staff.length > 0 && (
             <div className="mt-12 text-center">
-              <Button variant="outline" asChild className="border-stone-700 text-stone-900 hover:bg-stone-300 shadow-md">
+              <Button variant="outline" asChild className="border-stone-700 text-stone-300/90 hover:bg-stone-300 shadow-md">
                 <Link href="/barberos">Ver todo el equipo</Link>
               </Button>
             </div>
