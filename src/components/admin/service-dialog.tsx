@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useCreateService, useUpdateService } from "@/hooks/use-services";
+import { useCreateService, useUpdateService, Service } from "@/hooks/use-services";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -16,16 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-
-interface Service {
-  id: string;
-  name: string;
-  description?: string | null;
-  duration: number;
-  price: number;
-  imageUrl?: string | null;
-  isActive: boolean;
-}
 
 interface ServiceDialogProps {
   open: boolean;
@@ -56,9 +46,9 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
         name: service.name,
         description: service.description || "",
         duration: service.duration,
-        price: service.price,
+        price: typeof service.price === 'string' ? parseFloat(service.price) : service.price,
         imageUrl: service.imageUrl || "",
-        isActive: service.isActive,
+        isActive: service.isActive ?? true,
       });
     } else {
       setFormData({

@@ -200,7 +200,7 @@ export default function AdminDashboardPage() {
                     <div className="h-8 w-px bg-border" />
 
                     <div>
-                      <p className="font-medium">{appointment.client.name}</p>
+                      <p className="font-medium">{appointment.client?.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {appointment.service.name}
                         {appointment.staff && ` - ${appointment.staff.name}`}

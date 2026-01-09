@@ -3,6 +3,50 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
+export interface Appointment {
+  id: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  clientNotes?: string | null;
+  staffNotes?: string | null;
+  service: {
+    id: string;
+    name: string;
+    duration: number;
+    price: number | string;
+  };
+  staff?: {
+    id: string;
+    name: string;
+  } | null;
+  client?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+}
+
+interface AppointmentsResponse {
+  appointments: Appointment[];
+  total?: number;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
+export interface TimeSlot {
+  time: string;
+  available: boolean;
+}
+
+interface SlotsResponse {
+  slots: TimeSlot[];
+}
+
 interface AppointmentQueryParams {
   status?: string | string[];
   clientId?: string;
@@ -30,7 +74,7 @@ interface UpdateAppointmentData {
 }
 
 export function useAppointments(params?: AppointmentQueryParams) {
-  return useQuery({
+  return useQuery<AppointmentsResponse>({
     queryKey: ["appointments", params],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
@@ -217,7 +261,7 @@ export function useAvailableSlots(
   staffId?: string,
   options?: { enabled?: boolean }
 ) {
-  return useQuery({
+  return useQuery<SlotsResponse>({
     queryKey: ["available-slots", serviceId, date, staffId],
     queryFn: async () => {
       const response = await fetch("/api/appointments/available-slots", {

@@ -18,6 +18,9 @@ interface CreateRecordData {
 }
 
 interface UpdateRecordData {
+  serviceId?: string;
+  date?: string;
+  price?: number;
   notes?: string;
   tags?: string[];
   photoUrls?: string[];

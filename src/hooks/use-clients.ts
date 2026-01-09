@@ -2,6 +2,35 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  createdAt: string;
+  _count?: {
+    appointments: number;
+  };
+  appointments?: {
+    id: string;
+    startTime: string;
+  }[];
+  clientProfile?: {
+    internalNotes?: string | null;
+    tags?: string[];
+    preferredStaffId?: string | null;
+  } | null;
+}
+
+interface ClientsResponse {
+  clients: Client[];
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
 interface UpdateClientProfileData {
   internalNotes?: string;
   tags?: string[];
@@ -9,7 +38,7 @@ interface UpdateClientProfileData {
 }
 
 export function useClients(params?: { search?: string; page?: number; limit?: number }) {
-  return useQuery({
+  return useQuery<ClientsResponse>({
     queryKey: ["clients", params],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
@@ -30,7 +59,7 @@ export function useClients(params?: { search?: string; page?: number; limit?: nu
 }
 
 export function useClientById(id: string) {
-  return useQuery({
+  return useQuery<Client>({
     queryKey: ["clients", id],
     queryFn: async () => {
       const response = await fetch(`/api/clients/${id}`);

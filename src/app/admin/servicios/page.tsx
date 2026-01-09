@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useServices, useDeleteService } from "@/hooks/use-services";
+import { useServices, useDeleteService, Service } from "@/hooks/use-services";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,16 +27,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ServiceDialog } from "@/components/admin/service-dialog";
 import { Scissors, Plus, Edit, Eye, EyeOff, Trash2 } from "lucide-react";
-
-interface Service {
-  id: string;
-  name: string;
-  description?: string | null;
-  duration: number;
-  price: number;
-  imageUrl?: string | null;
-  isActive: boolean;
-}
 
 export default function ServiciosPage() {
   const { toast } = useToast();

@@ -52,15 +52,16 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 export default function PerfilPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const updateProfileMutation = useUpdateProfile();
-  const changePasswordMutation = useChangePassword();
+  const userId = user?.id || "";
+  const updateProfileMutation = useUpdateProfile(userId);
+  const changePasswordMutation = useChangePassword(userId);
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user?.name || "",
       email: user?.email || "",
-      phone: user?.phone || "",
+      phone: "",
     },
   });
 
@@ -78,11 +79,8 @@ export default function PerfilPage() {
 
     try {
       await updateProfileMutation.mutateAsync({
-        userId: user.id,
-        data: {
-          name: data.name,
-          phone: data.phone || undefined,
-        },
+        name: data.name,
+        phone: data.phone || undefined,
       });
 
       toast({
@@ -103,9 +101,9 @@ export default function PerfilPage() {
 
     try {
       await changePasswordMutation.mutateAsync({
-        userId: user.id,
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
       });
 
       toast({

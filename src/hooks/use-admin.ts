@@ -1,9 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { Appointment } from "./use-appointments";
+
+interface AdminStats {
+  appointmentsToday: number;
+  appointmentsPending: number;
+  monthlyRevenue: number;
+  totalClients: number;
+  newClientsThisMonth: number;
+  upcomingToday: Appointment[];
+}
 
 export function useAdminStats() {
-  return useQuery({
+  return useQuery<AdminStats>({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
       const response = await fetch("/api/admin/stats");

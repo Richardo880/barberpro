@@ -152,7 +152,7 @@ export default function ClientesPage() {
         </CardContent>
       </Card>
 
-      {clientsData && clientsData.pagination.total > 0 && (
+      {clientsData?.pagination && clientsData.pagination.total > 0 && (
         <div className="text-center text-sm text-muted-foreground">
           Mostrando {clients.length} de {clientsData.pagination.total} clientes
         </div>

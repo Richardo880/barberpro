@@ -282,7 +282,7 @@ export default function NuevaReservaPage() {
 
                 {staff
                   .filter((s) =>
-                    s.services.some((service) => service.id === state.serviceId)
+                    s.services?.some((service) => service.id === state.serviceId)
                   )
                   .map((member) => (
                     <Card

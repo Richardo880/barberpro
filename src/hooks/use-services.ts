@@ -2,6 +2,20 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+export interface Service {
+  id: string;
+  name: string;
+  description?: string | null;
+  duration: number;
+  price: number | string;
+  imageUrl?: string | null;
+  isActive?: boolean;
+}
+
+interface ServicesResponse {
+  services: Service[];
+}
+
 interface CreateServiceData {
   name: string;
   description?: string;
@@ -21,7 +35,7 @@ interface UpdateServiceData {
 }
 
 export function useServices(active = true) {
-  return useQuery({
+  return useQuery<ServicesResponse>({
     queryKey: ["services", { active }],
     queryFn: async () => {
       const response = await fetch(

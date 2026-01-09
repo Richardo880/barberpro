@@ -212,8 +212,8 @@ export default function TurnosPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="font-medium">{appointment.client.name}</div>
-                        {appointment.client.phone && (
+                        <div className="font-medium">{appointment.client?.name}</div>
+                        {appointment.client?.phone && (
                           <div className="text-sm text-muted-foreground">
                             {appointment.client.phone}
                           </div>
@@ -301,7 +301,7 @@ export default function TurnosPage() {
         </CardContent>
       </Card>
 
-      {appointmentsData && appointmentsData.total > 0 && (
+      {appointmentsData?.total && appointmentsData.total > 0 && (
         <div className="text-center text-sm text-muted-foreground">
           Mostrando {appointments.length} de {appointmentsData.total} turnos
         </div>

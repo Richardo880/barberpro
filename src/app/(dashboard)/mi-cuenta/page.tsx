@@ -119,8 +119,8 @@ export default function MiCuentaPage() {
     setLightboxOpen(true);
   };
 
-  const getStatusColor = (status: AppointmentStatus) => {
-    const colors = {
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
       [AppointmentStatus.PENDING]: "bg-yellow-500",
       [AppointmentStatus.CONFIRMED]: "bg-blue-500",
       [AppointmentStatus.COMPLETED]: "bg-green-500",
@@ -130,8 +130,8 @@ export default function MiCuentaPage() {
     return colors[status] || "bg-gray-500";
   };
 
-  const getStatusLabel = (status: AppointmentStatus) => {
-    const labels = {
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
       [AppointmentStatus.PENDING]: "Pendiente",
       [AppointmentStatus.CONFIRMED]: "Confirmado",
       [AppointmentStatus.COMPLETED]: "Completado",
