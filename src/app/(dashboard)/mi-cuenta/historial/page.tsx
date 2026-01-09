@@ -9,7 +9,6 @@ import { ImageLightbox } from "@/components/shared/image-lightbox";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar, Scissors, User, ImageIcon } from "lucide-react";
-import Image from "next/image";
 
 export default function HistorialPage() {
   const { data: recordsData, isLoading } = useRecords();
