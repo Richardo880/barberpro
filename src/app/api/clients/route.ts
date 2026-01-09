@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const validated = clientQuerySchema.safeParse(queryParams);
     if (!validated.success) {
       return NextResponse.json(
-        { error: "Parámetros inválidos", details: validated.error.errors },
+        { error: "Parámetros inválidos", details: validated.error.issues },
         { status: 400 }
       );
     }

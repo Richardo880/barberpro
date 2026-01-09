@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const validated = appointmentQuerySchema.safeParse(queryParams);
     if (!validated.success) {
       return NextResponse.json(
-        { error: "Parámetros inválidos", details: validated.error.errors },
+        { error: "Parámetros inválidos", details: validated.error.issues },
         { status: 400 }
       );
     }
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     const validated = createAppointmentSchema.safeParse(body);
     if (!validated.success) {
       return NextResponse.json(
-        { error: "Datos inválidos", details: validated.error.errors },
+        { error: "Datos inválidos", details: validated.error.issues },
         { status: 400 }
       );
     }

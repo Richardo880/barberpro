@@ -10,11 +10,11 @@ export async function POST(request: NextRequest) {
     // Validar datos con Zod
     const validated = registerSchema.safeParse(body);
     if (!validated.success) {
-      const firstError = validated.error.errors[0];
+      const firstError = validated.error.issues[0];
       return NextResponse.json(
         {
           error: firstError.message || "Datos inválidos",
-          details: validated.error.errors
+          details: validated.error.issues
         },
         { status: 400 }
       );

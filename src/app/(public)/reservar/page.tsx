@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 
-export default function ReservarPage() {
+function ReservarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useAuth();
@@ -33,5 +33,22 @@ export default function ReservarPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function ReservarPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-muted-foreground">
+            Cargando...
+          </p>
+        </div>
+      </div>
+    }>
+      <ReservarContent />
+    </Suspense>
   );
 }

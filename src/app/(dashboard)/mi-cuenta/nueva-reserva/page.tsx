@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useServices } from "@/hooks/use-services";
 import { useStaff } from "@/hooks/use-staff";
@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2, Loader2 as Loader2Icon } from "lucide-react";
 import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +33,7 @@ interface WizardState {
   notes: string;
 }
 
-export default function NuevaReservaPage() {
+function NuevaReservaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -552,5 +552,13 @@ export default function NuevaReservaPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div >
+  );
+}
+
+export default function NuevaReservaPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-8"><Loader2Icon className="h-8 w-8 animate-spin" /></div>}>
+      <NuevaReservaContent />
+    </Suspense>
   );
 }
