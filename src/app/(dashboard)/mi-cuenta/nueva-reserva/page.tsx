@@ -172,9 +172,8 @@ export default function NuevaReservaPage() {
               {services.map((service) => (
                 <Card
                   key={service.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    state.serviceId === service.id ? "ring-2 ring-primary" : ""
-                  }`}
+                  className={`cursor-pointer transition-all hover:shadow-md ${state.serviceId === service.id ? "ring-2 ring-primary" : ""
+                    }`}
                   onClick={() => handleServiceSelect(service.id)}
                 >
                   <CardContent className="p-6">
@@ -183,6 +182,14 @@ export default function NuevaReservaPage() {
                         <div className="flex items-center gap-2">
                           <Scissors className="h-5 w-5 text-primary" />
                           <h3 className="font-semibold">{service.name}</h3>
+                          {service.imageUrl ? (
+                            <img
+                              src={service.imageUrl}
+                              alt={service.name}
+                              className="relative h-48 w-full overflow-hidden bg-muted object-cover object-center rounded-md ml-auto"
+                            />
+                          ) : null}
+                          
                         </div>
                         {service.description && (
                           <p className="mt-2 text-sm text-muted-foreground">
@@ -209,272 +216,277 @@ export default function NuevaReservaPage() {
             </div>
           )}
         </div>
-      )}
+      )
+      }
 
       {/* Step 2: Select Staff */}
-      {step === 2 && selectedService && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Elige tu barbero</h2>
-            <Button variant="outline" size="sm" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Atrás
-            </Button>
-          </div>
-
-          <Card className="bg-muted/50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-sm">
-                <Scissors className="h-4 w-4 text-primary" />
-                <span>Servicio seleccionado:</span>
-                <span className="font-semibold">{selectedService.name}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {staffLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-48 animate-pulse rounded-lg bg-muted" />
-              ))}
+      {
+        step === 2 && selectedService && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Elige tu barbero</h2>
+              <Button variant="outline" size="sm" onClick={handleBack}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Atrás
+              </Button>
             </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Sin preferencia option */}
-              <Card
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  state.staffId === null ? "ring-2 ring-primary" : ""
-                }`}
-                onClick={() => handleStaffSelect(null)}
-              >
-                <CardContent className="flex flex-col items-center p-6 text-center">
-                  <Avatar className="h-20 w-20 border-2">
-                    <AvatarFallback className="bg-muted text-2xl">
-                      <User className="h-10 w-10" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <h3 className="mt-4 font-semibold">Sin preferencia</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Cualquier barbero disponible
-                  </p>
-                  {state.staffId === null && (
-                    <Check className="mt-2 h-5 w-5 text-primary" />
-                  )}
+
+            <Card className="bg-muted/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <Scissors className="h-4 w-4 text-primary" />
+                  <span>Servicio seleccionado:</span>
+                  <span className="font-semibold">{selectedService.name}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {staffLoading ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-48 animate-pulse rounded-lg bg-muted" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Sin preferencia option */}
+                <Card
+                  className={`cursor-pointer transition-all hover:shadow-md ${state.staffId === null ? "ring-2 ring-primary" : ""
+                    }`}
+                  onClick={() => handleStaffSelect(null)}
+                >
+                  <CardContent className="flex flex-col items-center p-6 text-center">
+                    <Avatar className="h-20 w-20 border-2">
+                      <AvatarFallback className="bg-muted text-2xl">
+                        <User className="h-10 w-10" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <h3 className="mt-4 font-semibold">Sin preferencia</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Cualquier barbero disponible
+                    </p>
+                    {state.staffId === null && (
+                      <Check className="mt-2 h-5 w-5 text-primary" />
+                    )}
+                  </CardContent>
+                </Card>
+
+                {staff
+                  .filter((s) =>
+                    s.services.some((service) => service.id === state.serviceId)
+                  )
+                  .map((member) => (
+                    <Card
+                      key={member.id}
+                      className={`cursor-pointer transition-all hover:shadow-md ${state.staffId === member.id ? "ring-2 ring-primary" : ""
+                        }`}
+                      onClick={() => handleStaffSelect(member.id)}
+                    >
+                      <CardContent className="flex flex-col items-center p-6 text-center">
+                        <Avatar className="h-20 w-20 border-2">
+                          <AvatarImage src={member.photoUrl || undefined} />
+                          <AvatarFallback className="text-2xl">
+                            {member.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <h3 className="mt-4 font-semibold">{member.name}</h3>
+                        {member.bio && (
+                          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                            {member.bio}
+                          </p>
+                        )}
+                        {state.staffId === member.id && (
+                          <Check className="mt-2 h-5 w-5 text-primary" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      {/* Step 3: Select Date & Time */}
+      {
+        step === 3 && selectedService && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Elige fecha y hora</h2>
+              <Button variant="outline" size="sm" onClick={handleBack}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Atrás
+              </Button>
+            </div>
+
+            <Card className="bg-muted/50">
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Scissors className="h-4 w-4 text-primary" />
+                  <span>{selectedService.name}</span>
+                </div>
+                {selectedStaff && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="h-4 w-4 text-primary" />
+                    <span>Barbero: {selectedStaff.name}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Calendar */}
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="mb-4 font-semibold">Selecciona un día</h3>
+                  <Calendar
+                    mode="single"
+                    selected={state.date || undefined}
+                    onSelect={handleDateSelect}
+                    disabled={(date) => date < today}
+                    locale={es}
+                    className="rounded-md border"
+                  />
                 </CardContent>
               </Card>
 
-              {staff
-                .filter((s) =>
-                  s.services.some((service) => service.id === state.serviceId)
-                )
-                .map((member) => (
-                  <Card
-                    key={member.id}
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      state.staffId === member.id ? "ring-2 ring-primary" : ""
-                    }`}
-                    onClick={() => handleStaffSelect(member.id)}
-                  >
-                    <CardContent className="flex flex-col items-center p-6 text-center">
-                      <Avatar className="h-20 w-20 border-2">
-                        <AvatarImage src={member.photoUrl || undefined} />
-                        <AvatarFallback className="text-2xl">
-                          {member.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .toUpperCase()
-                            .slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <h3 className="mt-4 font-semibold">{member.name}</h3>
-                      {member.bio && (
-                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                          {member.bio}
-                        </p>
-                      )}
-                      {state.staffId === member.id && (
-                        <Check className="mt-2 h-5 w-5 text-primary" />
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+              {/* Time Slots */}
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="mb-4 font-semibold">
+                    {state.date
+                      ? `Horarios - ${format(state.date, "d 'de' MMMM", { locale: es })}`
+                      : "Horarios disponibles"}
+                  </h3>
+                  {!state.date ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <p className="text-sm">Selecciona primero una fecha</p>
+                    </div>
+                  ) : slotsLoading ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[...Array(9)].map((_, i) => (
+                        <div key={i} className="h-10 animate-pulse rounded bg-muted" />
+                      ))}
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <p className="text-sm">No hay horarios disponibles</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {availableSlots.map((slot) => (
+                        <Button
+                          key={slot.time}
+                          variant={state.timeSlot === slot.time ? "default" : "outline"}
+                          size="sm"
+                          disabled={!slot.available}
+                          onClick={() => slot.available && handleTimeSlotSelect(slot.time)}
+                          className="w-full"
+                        >
+                          {slot.time}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Step 3: Select Date & Time */}
-      {step === 3 && selectedService && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Elige fecha y hora</h2>
-            <Button variant="outline" size="sm" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Atrás
-            </Button>
           </div>
-
-          <Card className="bg-muted/50">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Scissors className="h-4 w-4 text-primary" />
-                <span>{selectedService.name}</span>
-              </div>
-              {selectedStaff && (
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="h-4 w-4 text-primary" />
-                  <span>Barbero: {selectedStaff.name}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Calendar */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="mb-4 font-semibold">Selecciona un día</h3>
-                <Calendar
-                  mode="single"
-                  selected={state.date || undefined}
-                  onSelect={handleDateSelect}
-                  disabled={(date) => date < today}
-                  locale={es}
-                  className="rounded-md border"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Time Slots */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="mb-4 font-semibold">
-                  {state.date
-                    ? `Horarios - ${format(state.date, "d 'de' MMMM", { locale: es })}`
-                    : "Horarios disponibles"}
-                </h3>
-                {!state.date ? (
-                  <div className="flex items-center justify-center py-12 text-muted-foreground">
-                    <p className="text-sm">Selecciona primero una fecha</p>
-                  </div>
-                ) : slotsLoading ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    {[...Array(9)].map((_, i) => (
-                      <div key={i} className="h-10 animate-pulse rounded bg-muted" />
-                    ))}
-                  </div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="flex items-center justify-center py-12 text-muted-foreground">
-                    <p className="text-sm">No hay horarios disponibles</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-3 gap-2">
-                    {availableSlots.map((slot) => (
-                      <Button
-                        key={slot.time}
-                        variant={state.timeSlot === slot.time ? "default" : "outline"}
-                        size="sm"
-                        disabled={!slot.available}
-                        onClick={() => slot.available && handleTimeSlotSelect(slot.time)}
-                        className="w-full"
-                      >
-                        {slot.time}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Step 4: Confirmation */}
-      {step === 4 && selectedService && state.date && state.timeSlot && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Confirma tu reserva</h2>
-            <Button variant="outline" size="sm" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Atrás
-            </Button>
-          </div>
+      {
+        step === 4 && selectedService && state.date && state.timeSlot && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Confirma tu reserva</h2>
+              <Button variant="outline" size="sm" onClick={handleBack}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Atrás
+              </Button>
+            </div>
 
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CalendarIcon className="mt-1 h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">
-                      {format(state.date, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {state.timeSlot} hs
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Scissors className="mt-1 h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">{selectedService.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedService.duration} min - ₲{" "}
-                      {selectedService.price.toLocaleString("es-PY")}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedStaff ? (
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <User className="mt-1 h-5 w-5 text-primary" />
+                    <CalendarIcon className="mt-1 h-5 w-5 text-primary" />
                     <div>
-                      <p className="font-semibold">{selectedStaff.name}</p>
-                      <p className="text-sm text-muted-foreground">Barbero</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-3">
-                    <User className="mt-1 h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-semibold">Sin preferencia</p>
+                      <p className="font-semibold">
+                        {format(state.date, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+                      </p>
                       <p className="text-sm text-muted-foreground">
-                        Cualquier barbero disponible
+                        {state.timeSlot} hs
                       </p>
                     </div>
                   </div>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Notas adicionales (opcional)
-                </label>
-                <Textarea
-                  placeholder="Ej: Quiero un degradado bajo..."
-                  value={state.notes}
-                  onChange={(e) => setState({ ...state, notes: e.target.value })}
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="flex items-start gap-3">
+                    <Scissors className="mt-1 h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-semibold">{selectedService.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedService.duration} min - ₲{" "}
+                        {selectedService.price.toLocaleString("es-PY")}
+                      </p>
+                    </div>
+                  </div>
 
-          <div className="flex gap-3">
-            <Button
-              size="lg"
-              className="flex-1"
-              onClick={handleSubmit}
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending ? "Reservando..." : "Confirmar Reserva"}
-              {!createMutation.isPending && <Check className="ml-2 h-5 w-5" />}
-            </Button>
+                  {selectedStaff ? (
+                    <div className="flex items-start gap-3">
+                      <User className="mt-1 h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-semibold">{selectedStaff.name}</p>
+                        <p className="text-sm text-muted-foreground">Barbero</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-3">
+                      <User className="mt-1 h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-semibold">Sin preferencia</p>
+                        <p className="text-sm text-muted-foreground">
+                          Cualquier barbero disponible
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Notas adicionales (opcional)
+                  </label>
+                  <Textarea
+                    placeholder="Ej: Quiero un degradado bajo..."
+                    value={state.notes}
+                    onChange={(e) => setState({ ...state, notes: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex gap-3">
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={handleSubmit}
+                disabled={createMutation.isPending}
+              >
+                {createMutation.isPending ? "Reservando..." : "Confirmar Reserva"}
+                {!createMutation.isPending && <Check className="ml-2 h-5 w-5" />}
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Popup de confirmación */}
       <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
@@ -530,6 +542,6 @@ export default function NuevaReservaPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </div >
   );
 }

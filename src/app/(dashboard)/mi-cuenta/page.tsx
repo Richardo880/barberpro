@@ -2,9 +2,10 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { useAppointments } from "@/hooks/use-appointments";
+import { useRecords } from "@/hooks/use-records";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Award, Plus, List } from "lucide-react";
+import { Calendar, Clock, Award, Plus, List, History } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -16,13 +17,17 @@ export default function MiCuentaPage() {
   const { data: appointmentsData, isLoading } = useAppointments({
     status: [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING],
   });
+  const { data: recordsData } = useRecords();
 
   const appointments = appointmentsData?.appointments || [];
+  const records = recordsData?.records || [];
   const nextAppointment = appointments.sort(
     (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
   )[0];
 
   const totalAppointments = appointmentsData?.total || 0;
+  const totalCuts = records.length;
+  const lastCut = records.length > 0 ? records[0] : null;
 
   const getStatusColor = (status: AppointmentStatus) => {
     const colors = {
@@ -59,7 +64,7 @@ export default function MiCuentaPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Button size="lg" asChild>
           <Link href="/mi-cuenta/nueva-reserva">
             <Plus className="mr-2 h-5 w-5" />
@@ -69,7 +74,13 @@ export default function MiCuentaPage() {
         <Button size="lg" variant="outline" asChild>
           <Link href="/mi-cuenta/reservas">
             <List className="mr-2 h-5 w-5" />
-            Ver Mis Reservas
+            Mis Reservas
+          </Link>
+        </Button>
+        <Button size="lg" variant="outline" asChild>
+          <Link href="/mi-cuenta/historial">
+            <History className="mr-2 h-5 w-5" />
+            Mi Historial
           </Link>
         </Button>
       </div>
@@ -133,8 +144,10 @@ export default function MiCuentaPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
               <Award className="h-6 w-6 text-primary" />
             </div>
-            <p className="mt-4 text-3xl font-bold">-</p>
-            <p className="text-sm text-muted-foreground">Total de cortes</p>
+            <p className="mt-4 text-3xl font-bold">{totalCuts}</p>
+            <p className="text-sm text-muted-foreground">
+              {totalCuts === 1 ? "Corte realizado" : "Cortes realizados"}
+            </p>
           </CardContent>
         </Card>
 
@@ -143,7 +156,9 @@ export default function MiCuentaPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
               <Clock className="h-6 w-6 text-primary" />
             </div>
-            <p className="mt-4 text-3xl font-bold">-</p>
+            <p className="mt-4 text-3xl font-bold">
+              {lastCut ? format(new Date(lastCut.date), "d MMM", { locale: es }) : "-"}
+            </p>
             <p className="text-sm text-muted-foreground">Último corte</p>
           </CardContent>
         </Card>

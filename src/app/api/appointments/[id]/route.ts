@@ -162,6 +162,27 @@ export async function PATCH(
       },
     });
 
+    // Si el estado cambió a COMPLETED, crear automáticamente un registro de corte
+    if (updateData.status === "COMPLETED" && existingAppointment.status !== "COMPLETED") {
+      try {
+        await prisma.haircutRecord.create({
+          data: {
+            clientId: updated.clientId,
+            serviceId: updated.serviceId,
+            staffId: updated.staffId,
+            date: updated.startTime,
+            price: updated.service.price,
+            notes: updated.staffNotes || undefined,
+            tags: [],
+            photoUrls: [],
+          },
+        });
+      } catch (recordError) {
+        console.error("Error al crear registro de corte automático:", recordError);
+        // No fallar la actualización del appointment si falla la creación del registro
+      }
+    }
+
     return NextResponse.json({
       message: "Turno actualizado exitosamente",
       appointment: updated,

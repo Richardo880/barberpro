@@ -2,6 +2,7 @@
 
 import { useClientById, useUpdateClientProfile } from "@/hooks/use-clients";
 import { useAppointments } from "@/hooks/use-appointments";
+import { useRecords } from "@/hooks/use-records";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, Calendar, Award, ArrowLeft, Save } from "lucide-react";
+import { RecordDialog } from "@/components/admin/record-dialog";
+import { ImageLightbox } from "@/components/shared/image-lightbox";
+import { Mail, Phone, Calendar, Award, ArrowLeft, Save, Plus, History, ImageIcon, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
@@ -45,10 +48,22 @@ export default function ClienteDetallePage() {
   const { data: appointmentsData, isLoading: appointmentsLoading } = useAppointments({
     clientId,
   });
+  const { data: recordsData, isLoading: recordsLoading } = useRecords({ clientId });
   const updateMutation = useUpdateClientProfile();
 
   const [notes, setNotes] = useState("");
+  const [recordDialogOpen, setRecordDialogOpen] = useState(false);
   const [tags, setTags] = useState("");
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxInitialIndex, setLightboxInitialIndex] = useState(0);
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images);
+    setLightboxInitialIndex(index);
+    setLightboxOpen(true);
+  };
 
   const appointments = (appointmentsData?.appointments || []).sort(
     (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
@@ -183,10 +198,13 @@ export default function ClienteDetallePage() {
 
       {/* Tabs */}
       <Tabs defaultValue="info" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="info">Información</TabsTrigger>
           <TabsTrigger value="appointments">
-            Historial ({appointments.length})
+            Turnos ({appointments.length})
+          </TabsTrigger>
+          <TabsTrigger value="records">
+            Historial ({recordsData?.records?.length || 0})
           </TabsTrigger>
         </TabsList>
 
@@ -278,7 +296,162 @@ export default function ClienteDetallePage() {
             ))
           )}
         </TabsContent>
+
+        {/* Historial de Cortes */}
+        <TabsContent value="records" className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={() => setRecordDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Corte
+            </Button>
+          </div>
+
+          {recordsLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-6">
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-6 w-1/3 rounded bg-muted" />
+                      <div className="h-4 w-1/2 rounded bg-muted" />
+                      <div className="h-20 w-full rounded bg-muted" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : recordsData?.records?.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <History className="mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  No hay cortes registrados para este cliente
+                </p>
+                <Button
+                  className="mt-4"
+                  onClick={() => setRecordDialogOpen(true)}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Registrar Primer Corte
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            recordsData?.records?.map((record: any) => (
+              <Card key={record.id}>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {/* Información del corte */}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">
+                          {record.service.name}
+                        </h3>
+                        <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          {format(new Date(record.date), "d 'de' MMMM, yyyy", {
+                            locale: es,
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingRecord(record);
+                            setRecordDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </Button>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-primary">
+                            ${record.price}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    {record.tags && record.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {record.tags.map((tag: string, idx: number) => (
+                          <Badge key={idx} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Notas */}
+                    {record.notes && (
+                      <div className="rounded-lg bg-muted p-3">
+                        <p className="text-sm font-medium">Notas:</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {record.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Fotos */}
+                    {record.photoUrls && record.photoUrls.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <ImageIcon className="h-4 w-4" />
+                          Fotos ({record.photoUrls.length})
+                        </h4>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          {record.photoUrls.map((url: string, idx: number) => (
+                            <div
+                              key={idx}
+                              className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border bg-muted"
+                              onClick={() => openLightbox(record.photoUrls, idx)}
+                            >
+                              <img
+                                src={url}
+                                alt={`Foto ${idx + 1}`}
+                                className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
       </Tabs>
+
+      {/* Record Dialog */}
+      {client && (
+        <RecordDialog
+          open={recordDialogOpen}
+          onOpenChange={(open) => {
+            setRecordDialogOpen(open);
+            if (!open) {
+              setEditingRecord(null);
+            }
+          }}
+          clientId={clientId}
+          clientName={client.name}
+          record={editingRecord}
+        />
+      )}
+
+      {/* Lightbox para ver fotos en pantalla completa */}
+      {lightboxOpen && (
+        <ImageLightbox
+          images={lightboxImages}
+          initialIndex={lightboxInitialIndex}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 }

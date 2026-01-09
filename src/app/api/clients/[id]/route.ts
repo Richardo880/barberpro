@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,13 +13,15 @@ export async function GET(
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Admin/staff pueden ver cualquier cliente, clientes solo pueden verse a sí mismos
-    if (session.user.role === "CLIENT" && session.user.id !== params.id) {
+    if (session.user.role === "CLIENT" && session.user.id !== id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
     const client = await prisma.user.findUnique({
-      where: { id: params.id, role: "CLIENT" },
+      where: { id, role: "CLIENT" },
       select: {
         id: true,
         name: true,
@@ -101,7 +103,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -114,12 +116,13 @@ export async function PATCH(
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { internalNotes, tags, preferredStaffId } = body;
 
     // Verificar que el cliente existe
     const client = await prisma.user.findUnique({
-      where: { id: params.id, role: "CLIENT" },
+      where: { id, role: "CLIENT" },
       select: { id: true },
     });
 
@@ -132,7 +135,7 @@ export async function PATCH(
 
     // Actualizar ClientProfile
     const updated = await prisma.clientProfile.update({
-      where: { userId: params.id },
+      where: { userId: id },
       data: {
         ...(internalNotes !== undefined && { internalNotes }),
         ...(tags !== undefined && { tags }),

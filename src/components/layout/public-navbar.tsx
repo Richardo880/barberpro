@@ -36,34 +36,34 @@ export function PublicNavbar() {
   };
 
   return (
-    <nav className="border-b bg-white">
+    <nav className="border-b border-stone-700/30 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 shadow-lg">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-yellow-700 to-yellow-900 text-yellow-50 shadow-md group-hover:shadow-yellow-700/50 transition-all">
               <span className="font-bold">BP</span>
             </div>
-            <span className="text-xl font-bold">BarberPro</span>
+            <span className="text-xl font-bold text-stone-100 group-hover:text-yellow-600 transition-colors">BarberPro</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden items-center space-x-8 md:flex">
             <Link
               href="/"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="text-sm font-medium text-stone-300 transition-colors hover:text-yellow-600"
             >
               Inicio
             </Link>
             <Link
               href="/servicios"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="text-sm font-medium text-stone-300 transition-colors hover:text-yellow-600"
             >
               Servicios
             </Link>
             <Link
               href="/barberos"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="text-sm font-medium text-stone-300 transition-colors hover:text-yellow-600"
             >
               Barberos
             </Link>
@@ -74,13 +74,15 @@ export function PublicNavbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar>
-                      <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-stone-700/50">
+                    <Avatar className="border-2 border-yellow-700/50">
+                      <AvatarFallback className="bg-gradient-to-br from-yellow-700 to-yellow-900 text-yellow-50">
+                        {getInitials(user?.name)}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 bg-stone-900 border-stone-700 text-stone-100">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">{user?.name}</p>
@@ -112,10 +114,10 @@ export function PublicNavbar() {
               </DropdownMenu>
             ) : (
               <div className="hidden items-center space-x-2 md:flex">
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" asChild className="text-stone-300 hover:text-yellow-600 hover:bg-stone-700/50">
                   <Link href="/login">Iniciar Sesión</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="bg-gradient-to-r from-yellow-700 to-yellow-900 hover:from-yellow-600 hover:to-yellow-800 text-yellow-50 shadow-md">
                   <Link href="/registro">Registrarse</Link>
                 </Button>
               </div>
@@ -135,37 +137,37 @@ export function PublicNavbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="border-t py-4 md:hidden">
+          <div className="border-t border-stone-700/30 py-4 md:hidden bg-stone-800/50">
             <div className="flex flex-col space-y-3">
               <Link
                 href="/"
-                className="text-sm font-medium text-muted-foreground hover:text-primary"
+                className="text-sm font-medium text-stone-300 hover:text-yellow-600"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Inicio
               </Link>
               <Link
                 href="/servicios"
-                className="text-sm font-medium text-muted-foreground hover:text-primary"
+                className="text-sm font-medium text-stone-300 hover:text-yellow-600"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Servicios
               </Link>
               <Link
                 href="/barberos"
-                className="text-sm font-medium text-muted-foreground hover:text-primary"
+                className="text-sm font-medium text-stone-300 hover:text-yellow-600"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Barberos
               </Link>
               {!isAuthenticated && (
                 <>
-                  <Button variant="ghost" className="justify-start" asChild>
+                  <Button variant="ghost" className="justify-start text-stone-300 hover:text-yellow-600 hover:bg-stone-700/50" asChild>
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       Iniciar Sesión
                     </Link>
                   </Button>
-                  <Button className="justify-start" asChild>
+                  <Button className="justify-start bg-gradient-to-r from-yellow-700 to-yellow-900 text-yellow-50" asChild>
                     <Link href="/registro" onClick={() => setMobileMenuOpen(false)}>
                       Registrarse
                     </Link>
