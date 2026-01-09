@@ -48,8 +48,9 @@ export default function BarberosPage() {
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {staff.map((member) => (
-              <Card key={member.id} className="overflow-hidden transition-shadow hover:shadow-lg">
-                <CardContent className="p-6 text-center">
+              <Card key={member.id} className="overflow-hidden transition-shadow hover:shadow-lg h-full">
+                <CardContent className="p-6 text-center h-full flex flex-col">
+                  {/* Avatar */}
                   <Avatar className="mx-auto h-32 w-32 border-4 border-background shadow-md">
                     <AvatarImage src={member.photoUrl || undefined} />
                     <AvatarFallback className="text-3xl">
@@ -62,30 +63,38 @@ export default function BarberosPage() {
                     </AvatarFallback>
                   </Avatar>
 
+                  {/* Nombre */}
                   <h3 className="mt-6 text-xl font-semibold">{member.name}</h3>
 
-                  {member.bio && (
-                    <p className="mt-3 text-sm text-muted-foreground line-clamp-3">
-                      {member.bio}
-                    </p>
-                  )}
+                  {/* Bio - altura fija para alinear */}
+                  <div className="mt-3 min-h-[4.5rem]">
+                    {member.bio && (
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {member.bio}
+                      </p>
+                    )}
+                  </div>
 
-                  {member.services && member.services.length > 0 && (
-                    <div className="mt-4 flex flex-wrap justify-center gap-2">
-                      {member.services.slice(0, 3).map((service) => (
-                        <Badge key={service.id} variant="secondary">
-                          {service.name}
-                        </Badge>
-                      ))}
-                      {member.services.length > 3 && (
-                        <Badge variant="secondary">
-                          +{member.services.length - 3} más
-                        </Badge>
-                      )}
-                    </div>
-                  )}
+                  {/* Servicios - altura fija para alinear */}
+                  <div className="mt-4 min-h-[3.5rem] flex items-start justify-center">
+                    {member.services && member.services.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {member.services.slice(0, 3).map((service) => (
+                          <Badge key={service.id} variant="secondary">
+                            {service.name}
+                          </Badge>
+                        ))}
+                        {member.services.length > 3 && (
+                          <Badge variant="secondary">
+                            +{member.services.length - 3} más
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                  <div className="mt-6">
+                  {/* Botón - siempre al final */}
+                  <div className="mt-auto pt-6">
                     <Button asChild className="w-full">
                       <Link href={`/reservar?staff=${member.id}`}>
                         Reservar con {member.name.split(" ")[0]}
