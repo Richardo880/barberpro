@@ -4,7 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BarberPro is a barbershop management application built with React, TypeScript, and Vite. It provides appointment booking, staff management, and customer reviews for barbershops. The app uses localStorage as a mock database (no backend server).
+**BarberPro** is a full-stack barbershop management application built with Next.js 15, TypeScript, PostgreSQL, and Prisma. It provides appointment booking, staff management, customer history tracking, and an admin panel for business operations.
+
+**Current Status:** MVP Functional (85% complete)
+
+## Tech Stack
+
+- **Framework:** Next.js 15.1.0 (App Router)
+- **Language:** TypeScript 5.3.3
+- **Database:** PostgreSQL + Prisma ORM 5.9.1
+- **Authentication:** NextAuth 4.24.5 (Credentials + Google OAuth)
+- **UI:** Tailwind CSS 3.4.1 + shadcn/ui + Radix UI
+- **State Management:** TanStack Query (React Query) 5.20.2
+- **Validation:** Zod 3.25.76
+- **Forms:** React Hook Form 7.70.0
 
 ## Development Commands
 
@@ -18,111 +31,180 @@ npm run dev
 # Build for production
 npm run build
 
-# Preview production build
-npm run preview
+# Database commands
+npm run db:migrate      # Run Prisma migrations
+npm run db:seed         # Seed initial data
+npm run db:studio       # Open Prisma Studio
+npm run db:reset        # Reset database (⚠️ LOSES ALL DATA)
+
+# Quality
+npm run lint            # ESLint
+npm run type-check      # TypeScript check
+npm run test            # Vitest
+npm run test:e2e        # Playwright E2E tests
 ```
 
 ## Environment Setup
 
-The app requires a `GEMINI_API_KEY` in `.env.local`. The Vite config exposes this as `process.env.API_KEY` and `process.env.GEMINI_API_KEY` via `define` configuration.
+Required environment variables in `.env.local`:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/barberpro"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Optional: Google OAuth
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+```
 
 ## Architecture
 
-### Routing & Navigation
-- Uses **HashRouter** (not BrowserRouter) - all routes are prefixed with `#` in URLs
-- Routes defined in `App.tsx` with `ProtectedRoute` wrapper for authentication
-- Protected routes redirect unauthenticated users to `/login`
-- Admin routes check for `Role.ADMIN` and redirect non-admins to `/dashboard`
+### Project Structure
+
+```
+/src
+├── app/                    # Next.js App Router
+│   ├── (public)/          # Public pages (landing, services, barbers)
+│   ├── (auth)/            # Login & Register
+│   ├── (dashboard)/       # Client area (mi-cuenta)
+│   ├── admin/             # Admin panel
+│   └── api/               # API routes
+├── components/
+│   ├── ui/                # shadcn/ui components
+│   ├── layout/            # Navbar, Sidebar, Footer
+│   ├── providers/         # Auth, Theme, Query providers
+│   └── shared/            # Shared components
+├── hooks/                 # Custom React hooks
+├── lib/                   # Utilities (auth, prisma, validations)
+├── server/services/       # Business logic
+└── db/                    # Prisma schema, migrations, seed
+```
+
+### Routing
+
+**Public Routes:**
+- `/` - Landing page
+- `/servicios` - Services catalog
+- `/barberos` - Staff gallery
+- `/reservar` - Public booking page
+
+**Auth Routes:**
+- `/login` - Email/password + Google OAuth
+- `/registro` - New client registration
+
+**Client Dashboard (`/mi-cuenta`):**
+- `/mi-cuenta` - Dashboard with tabs (reservations, history)
+- `/mi-cuenta/nueva-reserva` - Multi-step booking wizard
+- `/mi-cuenta/perfil` - Profile editing
+
+**Admin Panel (`/admin`):**
+- `/admin` - Dashboard with metrics
+- `/admin/turnos` - Appointment management
+- `/admin/servicios` - Service CRUD
+- `/admin/clientes` - Client management
+- `/admin/clientes/[id]` - Client detail with history
 
 ### Authentication System
-- `AuthContext` (`contexts/AuthContext.tsx`) provides authentication state globally
-- Session persisted in `localStorage` with key `barber_session`
-- Login is email-only (password checking is mocked for demo purposes)
-- Users have roles: `ADMIN` or `USER` (defined in `types.ts`)
-- Default users seeded in `mockDb.ts`:
-  - Admin: `admin@barber.com`
-  - User: `juan@demo.com`
 
-### Data Layer (mockDb.ts)
-All data operations go through `services/mockDb.ts`, which simulates a backend API using localStorage:
+- **Provider:** NextAuth with JWT strategy (30-day validity)
+- **Methods:** Email/Password (bcrypt) + Google OAuth
+- **Roles:** `CLIENT`, `STAFF`, `ADMIN`
+- **Test Users (after seeding):**
+  - Admin: `admin@barberpro.com` / `Admin123!`
+  - Staff: `carlos@barberpro.com` / `User123!`
+  - Client: `juan@example.com` / `User123!`
 
-**Storage Keys:**
-- `barber_users` - User accounts
-- `barber_services` - Available services (haircuts, beard trims, etc.)
-- `barber_staff` - Staff members and their specialties
-- `barber_appointments` - All bookings
-- `barber_reviews` - Customer reviews
-- `barber_init` - Initialization flag
+### Database Schema (Prisma)
 
-**Key Services:**
-- `authService.login(email)` - Find user by email
-- `authService.register(name, email)` - Create new user account
-- `dataService.getServices()` - List all services
-- `dataService.getStaff()` - List all staff members
-- `dataService.getAppointments(userId?, role?)` - Get appointments (filtered by role: admins see all, users see only their own)
-- `dataService.createAppointment()` - Book appointment (prevents double-booking)
-- `dataService.updateAppointmentStatus(id, status)` - Update appointment status
-- `dataService.getAvailableSlots(date, staffId, serviceDuration)` - Get available time slots (9:00 - 18:00, 30-min intervals)
-- `dataService.addReview()` - Add review and mark appointment as reviewed
-- `dataService.getReviews()` - Get all reviews (newest first)
+**Main Entities:**
+- `User` - Accounts with role (CLIENT, STAFF, ADMIN)
+- `ClientProfile` - Extended client data (notes, tags, preferences)
+- `StaffProfile` - Barber profiles (bio, photo, services)
+- `Service` - Services offered (name, duration, price, image)
+- `Appointment` - Bookings (status: PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW)
+- `HaircutRecord` - Completed haircut history with photos
+- `BusinessHours` - Operating hours by day
+- `Closure` - Holiday/vacation closures
+- `AuditLog` - Action logging for admin
 
-**Important Data Rules:**
-- All service methods return Promises with artificial delays to simulate network latency
-- Appointments include joined data (user, staff, service objects) for display
-- Time slots are simple exact-match checks (doesn't calculate overlapping ranges)
-- Reviews automatically set `hasReview: true` on the associated appointment
+### API Routes
 
-### Type System
-All types defined in `types.ts`:
-- `User` - User accounts with role
-- `Service` - Services offered (duration in minutes, price)
-- `Staff` - Staff members with service IDs they can perform
-- `Appointment` - Bookings with status enum
-- `Review` - Customer feedback with 1-5 star rating
-- `Slot` - Time slot availability
-- Enums: `Role`, `AppointmentStatus`
+**Appointments:**
+- `GET/POST /api/appointments` - List/Create appointments
+- `GET/PATCH/DELETE /api/appointments/[id]` - Single appointment operations
+- `POST /api/appointments/available-slots` - Get available time slots
 
-### UI Components
-- `Layout.tsx` - Top navigation bar, user menu, footer (wraps all pages)
-- `components/ui/Button.tsx` - Reusable button with variants
-- Pages in `pages/` directory:
-  - `Home.tsx` - Landing page
-  - `Auth.tsx` - Login and Register forms
-  - `Dashboard.tsx` - User's appointments list with cancel/review actions
-  - `BookingWizard.tsx` - Multi-step booking flow (service → staff → date/time)
-  - `AdminPanel.tsx` - Admin view of all appointments and stats
+**Services:**
+- `GET/POST /api/services` - List/Create services
+- `PATCH/DELETE /api/services/[id]` - Update/Delete service
 
-### Path Aliases
-The project uses `@/*` alias pointing to root directory (configured in both `tsconfig.json` and `vite.config.ts`). However, most imports use relative paths.
+**Clients:**
+- `GET /api/clients` - List clients (admin)
+- `GET/PATCH /api/clients/[id]` - Client details
 
-## Common Patterns
+**Staff:**
+- `GET /api/staff` - List barbers
+
+**Records:**
+- `GET/POST /api/records` - Haircut history
+- `PATCH/DELETE /api/records/[id]` - Update/Delete record
+
+**Admin:**
+- `GET /api/admin/stats` - Dashboard statistics
+
+## Key Patterns
 
 ### Working with Appointments
-When modifying appointment logic:
-1. Status changes go through `dataService.updateAppointmentStatus()`
-2. Always check `role` when fetching appointments (admins vs users have different views)
-3. Join operations happen in `getAppointments()` - it populates `user`, `staff`, `service` nested objects
-4. Status enum values: `PENDING`, `CONFIRMED`, `COMPLETED`, `CANCELLED`
+1. Create via `POST /api/appointments` with `serviceId`, `startTime`, optional `staffId`
+2. Status flow: `PENDING` → `CONFIRMED` → `COMPLETED` (or `CANCELLED`/`NO_SHOW`)
+3. Available slots calculated by `AvailabilityService` considering business hours and existing bookings
 
 ### Adding New Features
-- New data entities need storage key added to `STORAGE_KEYS` in `mockDb.ts`
-- Seed data should be added in `initDb()` initialization
-- New types should be defined in `types.ts`
-- Protected pages need `<ProtectedRoute>` wrapper in `App.tsx`
+1. Add Prisma model in `src/db/schema.prisma`
+2. Run `npm run db:migrate` to create migration
+3. Create API route in `src/app/api/`
+4. Create hook in `src/hooks/` using TanStack Query
+5. Add UI components and pages
 
 ### Styling
-- Uses Tailwind CSS utility classes (no separate CSS files)
-- Custom colors defined via `primary-*` classes (assumed to be configured in Tailwind config)
-- Responsive breakpoints: `sm:`, `md:`, `lg:`
+- Tailwind CSS utility classes
+- CSS variables for theming (light/dark mode via `next-themes`)
+- Custom colors in `globals.css` (`:root` and `.dark` selectors)
+- Responsive: `sm:`, `md:`, `lg:` breakpoints
+
+## Recent Features Added
+
+- ✅ Dark/Light mode toggle in navbar
+- ✅ Unified client dashboard with tabs (reservations + history)
+- ✅ Improved service cards in booking wizard
+- ✅ Admin/Staff role detection in navbar menu
+- ✅ Aligned barber cards in gallery
+
+## Known Limitations & TODOs
+
+### Critical (Before Production)
+- ❌ Email notifications for appointments (confirmations, reminders)
+- ❌ Password reset functionality
+- ❌ Photo upload integration (needs S3/Cloudinary)
+- ❌ Rate limiting on critical endpoints
+
+### Important
+- ⚠️ Test coverage is low (<5%)
+- ⚠️ Staff availability not fully validated per barber
+- ⚠️ No payment integration (MercadoPago, Stripe)
+- ⚠️ No SMS/WhatsApp notifications
+
+### Nice to Have
+- Reviews/ratings system
+- Recurring appointments
+- Google Calendar integration
+- PDF reports for admin
 
 ## Code Style
 
-### Comments
-Use comments sparingly. Only comment complex code where the logic isn't self-evident. Prefer writing self-documenting code with clear variable and function names over adding explanatory comments.
-
-## Known Limitations
-- No real backend - all data in localStorage (clears on cache clear)
-- Password validation is mocked (any password works if email exists)
-- Time slot overlap detection is basic (exact time match only)
-- No TypeScript strict mode enabled
-- No test suite present
+- Use comments sparingly - prefer self-documenting code
+- Follow existing patterns for hooks, API routes, and components
+- Validate inputs with Zod schemas in `src/lib/validations/`
+- Use TypeScript strictly - avoid `any` types
+- Keep components focused and composable
