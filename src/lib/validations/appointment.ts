@@ -38,7 +38,7 @@ export const updateAppointmentClientSchema = z.object({
 
 // Schema para actualizar appointment (admin/staff)
 export const updateAppointmentAdminSchema = z.object({
-  status: z.nativeEnum(AppointmentStatus).optional(),
+  status: z.enum(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED", "NO_SHOW"]).optional(),
   staffId: z.string().cuid().optional().nullable(),
   startTime: z.string().datetime().optional(),
   clientNotes: z.string().max(500).optional(),

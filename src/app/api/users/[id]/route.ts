@@ -6,16 +6,17 @@ import { updateProfileSchema } from "@/lib/validations/user";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
     // Los usuarios solo pueden actualizar su propio perfil (excepto admins)
-    if (session.user.role !== "ADMIN" && session.user.id !== params.id) {
+    if (session.user.role !== "ADMIN" && session.user.id !== id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
@@ -34,7 +35,7 @@ export async function PATCH(
 
     // Actualizar usuario
     const updated = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(phone && { phone }),
