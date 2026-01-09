@@ -29,12 +29,6 @@ interface UpdateAppointmentData {
   staffNotes?: string;
 }
 
-interface AvailabilitySlotsParams {
-  serviceId: string;
-  staffId?: string;
-  date: string; // YYYY-MM-DD
-}
-
 export function useAppointments(params?: AppointmentQueryParams) {
   return useQuery({
     queryKey: ["appointments", params],

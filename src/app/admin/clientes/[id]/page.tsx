@@ -17,7 +17,7 @@ import { Mail, Phone, Calendar, Award, ArrowLeft, Save, Plus, History, ImageIcon
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AppointmentStatus } from "@prisma/client";
@@ -40,7 +40,6 @@ const statusLabels = {
 
 export default function ClienteDetallePage() {
   const params = useParams();
-  const router = useRouter();
   const { toast } = useToast();
   const clientId = params.id as string;
 

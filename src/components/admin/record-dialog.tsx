@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload, Image as ImageIcon } from "lucide-react";
+import { X, Upload } from "lucide-react";
 
 interface RecordDialogProps {
   open: boolean;

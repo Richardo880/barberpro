@@ -8,7 +8,6 @@ import { useAvailableSlots, useCreateAppointment } from "@/hooks/use-appointment
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Progress } from "@/components/ui/progress";
@@ -21,8 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, ArrowRight, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
-import { format, addDays, startOfDay } from "date-fns";
+import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
+import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 

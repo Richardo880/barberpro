@@ -1,13 +1,6 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-
-interface ClientQueryParams {
-  search?: string;
-  page?: number;
-  limit?: number;
-}
 
 interface UpdateClientProfileData {
   internalNotes?: string;
