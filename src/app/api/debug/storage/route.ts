@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "ADMIN") {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       const testContent = new Uint8Array([0x89, 0x50, 0x4E, 0x47]); // PNG header
       const testFileName = `test-${Date.now()}.txt`;
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from(bucketName)
         .upload(testFileName, testContent, {
           contentType: "text/plain",

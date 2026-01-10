@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const buffer = new Uint8Array(arrayBuffer);
 
     // Subir a Supabase Storage
-    const { data, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.STAFF)
       .upload(uniqueFileName, buffer, {
         contentType: file.type,
