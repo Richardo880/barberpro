@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       .replace(/^-|-$/g, ""); // Remover guiones al inicio/final
 
     const uploadedUrls: string[] = [];
+    const errors: string[] = [];
 
     // Procesar cada archivo
     for (const file of files) {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
       const buffer = new Uint8Array(arrayBuffer);
 
       // Subir a Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKETS.RECORDS)
         .upload(storagePath, buffer, {
           contentType: file.type,
@@ -79,6 +80,7 @@ export async function POST(request: NextRequest) {
 
       if (uploadError) {
         console.error("Error al subir archivo a Supabase:", uploadError);
+        errors.push(uploadError.message);
         continue;
       }
 
@@ -88,8 +90,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (uploadedUrls.length === 0) {
+      const errorMessage = errors.length > 0 ? errors[0] : "Error desconocido";
       return NextResponse.json(
-        { error: "No se pudieron subir los archivos" },
+        {
+          error: "No se pudieron subir los archivos",
+          details: errorMessage,
+          hint: errorMessage.includes("not found")
+            ? "El bucket 'records' no existe. Créalo en Supabase Dashboard > Storage."
+            : errorMessage.includes("security") || errorMessage.includes("policy")
+            ? "Falta configurar políticas RLS en el bucket. Ve a Supabase Dashboard > Storage > records > Policies."
+            : undefined
+        },
         { status: 400 }
       );
     }
@@ -101,7 +112,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error al subir archivos:", error);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { error: "Error interno del servidor", details: String(error) },
       { status: 500 }
     );
   }

@@ -172,11 +172,13 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
           body: uploadFormData,
         });
 
+        const uploadData = await uploadResponse.json();
+
         if (!uploadResponse.ok) {
-          throw new Error("Error al subir la imagen");
+          const errorMsg = uploadData.hint || uploadData.details || uploadData.error || "Error al subir la imagen";
+          throw new Error(errorMsg);
         }
 
-        const uploadData = await uploadResponse.json();
         photoUrl = uploadData.url;
       }
 

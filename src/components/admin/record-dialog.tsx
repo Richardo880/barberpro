@@ -135,11 +135,13 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
           body: uploadFormData,
         });
 
+        const uploadData = await uploadResponse.json();
+
         if (!uploadResponse.ok) {
-          throw new Error("Error al subir las fotos");
+          const errorMsg = uploadData.hint || uploadData.details || uploadData.error || "Error al subir las fotos";
+          throw new Error(errorMsg);
         }
 
-        const uploadData = await uploadResponse.json();
         newPhotoUrls = uploadData.urls;
       }
 

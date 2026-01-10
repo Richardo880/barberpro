@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const buffer = new Uint8Array(arrayBuffer);
 
     // Subir a Supabase Storage
-    const { error: uploadError } = await supabase.storage
+    const { data, error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.SERVICES)
       .upload(uniqueFileName, buffer, {
         contentType: file.type,
@@ -57,7 +57,15 @@ export async function POST(request: NextRequest) {
     if (uploadError) {
       console.error("Error al subir archivo a Supabase:", uploadError);
       return NextResponse.json(
-        { error: "Error al subir el archivo" },
+        {
+          error: "Error al subir el archivo",
+          details: uploadError.message,
+          hint: uploadError.message.includes("not found")
+            ? "El bucket 'services' no existe. Créalo en Supabase Dashboard > Storage."
+            : uploadError.message.includes("security") || uploadError.message.includes("policy")
+            ? "Falta configurar políticas RLS en el bucket. Ve a Supabase Dashboard > Storage > services > Policies."
+            : undefined
+        },
         { status: 500 }
       );
     }
@@ -72,7 +80,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error al subir archivo:", error);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { error: "Error interno del servidor", details: String(error) },
       { status: 500 }
     );
   }
