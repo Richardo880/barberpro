@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
+  UserCog,
   LogOut,
   Menu,
   X,
@@ -24,6 +25,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Turnos", href: "/admin/turnos", icon: Calendar },
   { name: "Clientes", href: "/admin/clientes", icon: Users },
+  { name: "Staff", href: "/admin/staff", icon: UserCog },
   { name: "Servicios", href: "/admin/servicios", icon: Scissors },
 ];
 

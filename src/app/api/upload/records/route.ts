@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
+import { supabase, STORAGE_BUCKETS, getPublicUrl } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitizar el nombre del cliente para usar como nombre de carpeta
+    // Sanitizar el nombre del cliente para usar como carpeta
     const sanitizedClientName = clientName
       .toLowerCase()
       .normalize("NFD")
@@ -46,20 +44,6 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]/g, "-") // Reemplazar caracteres especiales con guiones
       .replace(/-+/g, "-") // Evitar guiones múltiples
       .replace(/^-|-$/g, ""); // Remover guiones al inicio/final
-
-    // Crear la ruta de la carpeta del cliente
-    const clientFolder = path.join(
-      process.cwd(),
-      "public",
-      "images",
-      "records",
-      sanitizedClientName
-    );
-
-    // Crear la carpeta si no existe
-    if (!existsSync(clientFolder)) {
-      await mkdir(clientFolder, { recursive: true });
-    }
 
     const uploadedUrls: string[] = [];
 
@@ -75,18 +59,31 @@ export async function POST(request: NextRequest) {
       // Generar nombre único para el archivo
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 8);
-      const extension = path.extname(file.name);
-      const uniqueFileName = `${timestamp}-${randomStr}${extension}`;
+      const extension = file.name.split('.').pop() || 'jpg';
+      const uniqueFileName = `${timestamp}-${randomStr}.${extension}`;
 
-      // Guardar el archivo
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const filePath = path.join(clientFolder, uniqueFileName);
+      // Ruta en Supabase Storage: clientName/filename
+      const storagePath = `${sanitizedClientName}/${uniqueFileName}`;
 
-      await writeFile(filePath, buffer);
+      // Convertir File a ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = new Uint8Array(arrayBuffer);
 
-      // Construir la URL pública
-      const publicUrl = `/images/records/${sanitizedClientName}/${uniqueFileName}`;
+      // Subir a Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKETS.RECORDS)
+        .upload(storagePath, buffer, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Error al subir archivo a Supabase:", uploadError);
+        continue;
+      }
+
+      // Obtener URL pública
+      const publicUrl = getPublicUrl(STORAGE_BUCKETS.RECORDS, storagePath);
       uploadedUrls.push(publicUrl);
     }
 

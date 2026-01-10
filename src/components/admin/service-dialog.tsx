@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Upload, X, Scissors } from "lucide-react";
 
 interface ServiceDialogProps {
   open: boolean;
@@ -38,6 +39,9 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Cargar datos del servicio si estamos editando
   useEffect(() => {
@@ -60,8 +64,17 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
         isActive: true,
       });
     }
+    setSelectedFile(null);
+    setPreviewUrl(null);
     setErrors({});
   }, [service, open]);
+
+  // Cleanup preview URL
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -82,6 +95,31 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Archivo inválido",
+        description: "Solo puedes subir archivos de imagen",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setSelectedFile(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setFormData({ ...formData, imageUrl: "" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -90,12 +128,34 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
     }
 
     try {
+      setIsUploading(true);
+
+      let imageUrl = formData.imageUrl;
+
+      // Subir imagen si hay una nueva seleccionada
+      if (selectedFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", selectedFile);
+
+        const uploadResponse = await fetch("/api/upload/services", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Error al subir la imagen");
+        }
+
+        const uploadData = await uploadResponse.json();
+        imageUrl = uploadData.url;
+      }
+
       const data = {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         duration: formData.duration,
         price: formData.price,
-        imageUrl: formData.imageUrl.trim() || undefined,
+        imageUrl: imageUrl || undefined,
         isActive: formData.isActive,
       };
 
@@ -120,14 +180,19 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
         description: error.message || "No se pudo guardar el servicio",
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = createMutation.isPending || updateMutation.isPending || isUploading;
+
+  // Determinar qué imagen mostrar
+  const displayImageUrl = previewUrl || formData.imageUrl;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
             {service ? "Editar Servicio" : "Nuevo Servicio"}
@@ -141,6 +206,64 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+            {/* Imagen */}
+            <div className="space-y-2">
+              <Label>Imagen del Servicio</Label>
+              <div className="flex items-start gap-4">
+                {/* Preview de imagen */}
+                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border bg-muted">
+                  {displayImageUrl ? (
+                    <>
+                      <img
+                        src={displayImageUrl}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-1 top-1 h-6 w-6"
+                        onClick={removeImage}
+                        disabled={isLoading}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Scissors className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Botón de upload */}
+                <div className="flex-1 space-y-2">
+                  <Input
+                    id="service-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={isLoading}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById("service-image-upload")?.click()}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    {displayImageUrl ? "Cambiar imagen" : "Subir imagen"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Imagen de referencia del servicio (opcional)
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Nombre */}
             <div className="space-y-2">
               <Label htmlFor="name">
@@ -173,24 +296,6 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
                 disabled={isLoading}
                 rows={3}
               />
-            </div>
-
-            {/* URL de Imagen */}
-            <div className="space-y-2">
-              <Label htmlFor="imageUrl">URL de Imagen de Referencia</Label>
-              <Input
-                id="imageUrl"
-                type="url"
-                placeholder="https://ejemplo.com/imagen.jpg (opcional)"
-                value={formData.imageUrl}
-                onChange={(e) =>
-                  setFormData({ ...formData, imageUrl: e.target.value })
-                }
-                disabled={isLoading}
-              />
-              <p className="text-xs text-muted-foreground">
-                Agrega una URL de imagen para mostrar una referencia visual del servicio
-              </p>
             </div>
 
             {/* Duración y Precio */}
@@ -271,7 +376,12 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Guardando..." : service ? "Actualizar" : "Crear"}
+              {isUploading
+                ? "Subiendo imagen..."
+                : (createMutation.isPending || updateMutation.isPending)
+                ? "Guardando..."
+                : service ? "Actualizar" : "Crear"
+              }
             </Button>
           </DialogFooter>
         </form>
