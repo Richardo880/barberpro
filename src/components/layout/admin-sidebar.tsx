@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,6 +19,7 @@ import {
   X,
   Home,
   Scissors,
+  Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +29,7 @@ const navigation = [
   { name: "Clientes", href: "/admin/clientes", icon: Users },
   { name: "Staff", href: "/admin/staff", icon: UserCog },
   { name: "Servicios", href: "/admin/servicios", icon: Scissors },
+  { name: "Promociones", href: "/admin/promociones", icon: Tag },
 ];
 
 export function AdminSidebar() {
@@ -43,8 +46,15 @@ export function AdminSidebar() {
       {/* Mobile menu button */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b bg-background p-4 lg:hidden">
         <Link href="/admin" className="flex items-center gap-2">
-          <Scissors className="h-6 w-6 text-primary" />
-          <span className="text-lg font-bold">BarberPro</span>
+          <Image
+            src="/images/menu/logo.jpeg"
+            alt="Barbería Imperio"
+            width={32}
+            height={32}
+            className="rounded-full"
+            unoptimized
+          />
+          <span className="text-lg font-bold">Barbería Imperio</span>
         </Link>
         <Button
           variant="ghost"
@@ -77,8 +87,15 @@ export function AdminSidebar() {
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center gap-2 px-6">
-            <Scissors className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">BarberPro</span>
+            <Image
+              src="/images/menu/logo.jpeg"
+              alt="Barbería Imperio"
+              width={32}
+              height={32}
+              className="rounded-full"
+              unoptimized
+            />
+            <span className="text-xl font-bold">Barbería Imperio</span>
             <span className="ml-auto rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
               Admin
             </span>

@@ -350,6 +350,63 @@ async function main() {
   });
   console.log('  ✓ Cancelación permitida hasta: 24 horas antes');
 
+  // Configuración de promoción
+  await prisma.appConfig.upsert({
+    where: { key: 'promo_enabled' },
+    update: {},
+    create: {
+      key: 'promo_enabled',
+      value: 'true',
+      type: 'boolean',
+      description: 'Habilitar/deshabilitar promoción semanal',
+    },
+  });
+
+  await prisma.appConfig.upsert({
+    where: { key: 'promo_day' },
+    update: {},
+    create: {
+      key: 'promo_day',
+      value: '3',
+      type: 'number',
+      description: 'Día de la semana para la promoción (0=Domingo, 3=Miércoles)',
+    },
+  });
+
+  await prisma.appConfig.upsert({
+    where: { key: 'promo_discount' },
+    update: {},
+    create: {
+      key: 'promo_discount',
+      value: '10000',
+      type: 'number',
+      description: 'Monto del descuento en guaraníes',
+    },
+  });
+
+  await prisma.appConfig.upsert({
+    where: { key: 'promo_message' },
+    update: {},
+    create: {
+      key: 'promo_message',
+      value: '¡Miércoles de Promo! Cortes seleccionados con ₲10.000 de descuento',
+      type: 'string',
+      description: 'Mensaje a mostrar en el banner de promoción',
+    },
+  });
+
+  await prisma.appConfig.upsert({
+    where: { key: 'promo_service_ids' },
+    update: {},
+    create: {
+      key: 'promo_service_ids',
+      value: JSON.stringify([createdServices[0].id, createdServices[1].id]),
+      type: 'json',
+      description: 'IDs de servicios que tienen promoción',
+    },
+  });
+  console.log('  ✓ Promoción configurada: Miércoles con ₲10.000 de descuento');
+
   // ============================================
   // 8. CREAR CIERRE EXCEPCIONAL DE EJEMPLO
   // ============================================

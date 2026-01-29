@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -37,10 +38,15 @@ export function DashboardNavbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <span className="font-bold">BP</span>
-            </div>
-            <span className="text-xl font-bold">BarberPro</span>
+            <Image
+              src="/images/menu/logo.jpeg"
+              alt="Barbería Imperio"
+              width={40}
+              height={40}
+              className="rounded-full"
+              unoptimized
+            />
+            <span className="text-xl font-bold">Barbería Imperio</span>
           </Link>
 
           {/* User Menu */}

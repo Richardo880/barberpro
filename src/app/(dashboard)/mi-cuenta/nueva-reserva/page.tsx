@@ -24,6 +24,9 @@ import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, Chec
 import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { usePromotion, getDiscountedPrice } from "@/hooks/use-promotion";
+import { Badge } from "@/components/ui/badge";
+import { Tag } from "lucide-react";
 
 interface WizardState {
   serviceId: string | null;
@@ -50,7 +53,9 @@ function NuevaReservaContent() {
 
   const { data: servicesData, isLoading: servicesLoading } = useServices();
   const { data: staffData, isLoading: staffLoading } = useStaff();
+  const { data: promoData } = usePromotion();
   const createMutation = useCreateAppointment();
+  const promotion = promoData?.promotion;
 
   const services = servicesData?.services || [];
   const staff = staffData?.staff || [];
@@ -215,9 +220,24 @@ function NuevaReservaContent() {
                         <Clock className="h-4 w-4" />
                         {service.duration} min
                       </span>
-                      <span className="font-semibold text-primary">
-                        ₲ {service.price.toLocaleString("es-PY")}
-                      </span>
+                      {(() => {
+                        const numericPrice = typeof service.price === "number" ? service.price : parseFloat(String(service.price));
+                        const { finalPrice, hasDiscount } = getDiscountedPrice(numericPrice, service.id, promotion);
+                        return hasDiscount ? (
+                          <span className="flex items-center gap-1">
+                            <span className="text-muted-foreground line-through text-xs">
+                              ₲ {numericPrice.toLocaleString("es-PY")}
+                            </span>
+                            <span className="font-semibold text-green-600">
+                              ₲ {finalPrice.toLocaleString("es-PY")}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-primary">
+                            ₲ {numericPrice.toLocaleString("es-PY")}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>
@@ -439,11 +459,37 @@ function NuevaReservaContent() {
                   <div className="flex items-start gap-3">
                     <Scissors className="mt-1 h-5 w-5 text-primary" />
                     <div>
-                      <p className="font-semibold">{selectedService.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedService.duration} min - ₲{" "}
-                        {selectedService.price.toLocaleString("es-PY")}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold">{selectedService.name}</p>
+                        {(() => {
+                          const numericPrice = typeof selectedService.price === "number" ? selectedService.price : parseFloat(String(selectedService.price));
+                          const { hasDiscount } = getDiscountedPrice(numericPrice, selectedService.id, promotion);
+                          return hasDiscount ? (
+                            <Badge variant="destructive" className="text-xs">
+                              <Tag className="mr-1 h-3 w-3" />
+                              Promo
+                            </Badge>
+                          ) : null;
+                        })()}
+                      </div>
+                      {(() => {
+                        const numericPrice = typeof selectedService.price === "number" ? selectedService.price : parseFloat(String(selectedService.price));
+                        const { finalPrice, hasDiscount } = getDiscountedPrice(numericPrice, selectedService.id, promotion);
+                        return (
+                          <p className="text-sm text-muted-foreground">
+                            {selectedService.duration} min -{" "}
+                            {hasDiscount ? (
+                              <>
+                                <span className="line-through">₲ {numericPrice.toLocaleString("es-PY")}</span>
+                                {" "}
+                                <span className="text-green-600 font-semibold">₲ {finalPrice.toLocaleString("es-PY")}</span>
+                              </>
+                            ) : (
+                              <>₲ {numericPrice.toLocaleString("es-PY")}</>
+                            )}
+                          </p>
+                        );
+                      })()}
                     </div>
                   </div>
 

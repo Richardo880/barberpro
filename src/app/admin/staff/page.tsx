@@ -28,12 +28,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import { StaffDialog } from "@/components/admin/staff-dialog";
 import { Users, Plus, Edit, Eye, EyeOff, Trash2 } from "lucide-react";
+import { SortableHeader, useSortState } from "@/components/ui/sortable-header";
 
 export default function StaffPage() {
   const { toast } = useToast();
   const { data: staffData, isLoading } = useStaff({ includeInactive: true }); // Incluir inactivos
   const deleteMutation = useDeleteStaff();
-  const staff = staffData?.staff || [];
+  const { sortKey, sortDirection, handleSort, sortData } = useSortState<any>("nombre", "asc");
+
+  const sortedStaff = sortData(staffData?.staff || [], {
+    nombre: (item) => item.name,
+    email: (item) => item.email,
+    servicios: (item) => item.services?.length || 0,
+    estado: (item) => item.isActive ? "Activo" : "Inactivo",
+  });
+
+  const staff = sortedStaff;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
@@ -121,11 +131,43 @@ export default function StaffPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">Foto</TableHead>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Contacto</TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Nombre"
+                      sortKey="nombre"
+                      currentSort={sortKey}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Contacto"
+                      sortKey="email"
+                      currentSort={sortKey}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
                   <TableHead>Especialidades</TableHead>
-                  <TableHead>Servicios</TableHead>
-                  <TableHead>Estado</TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Servicios"
+                      sortKey="servicios"
+                      currentSort={sortKey}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Estado"
+                      sortKey="estado"
+                      currentSort={sortKey}
+                      currentDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>

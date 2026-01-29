@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -42,10 +43,15 @@ export function PublicNavbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-yellow-700 to-yellow-900 text-yellow-50 shadow-md group-hover:shadow-yellow-700/50 transition-all">
-              <span className="font-bold">BP</span>
-            </div>
-            <span className="text-xl font-bold text-stone-100 group-hover:text-yellow-600 transition-colors">BarberPro</span>
+            <Image
+              src="/images/menu/logo.jpeg"
+              alt="Barbería Imperio"
+              width={40}
+              height={40}
+              className="rounded-full shadow-md group-hover:shadow-yellow-700/50 transition-all"
+              unoptimized
+            />
+            <span className="text-xl font-bold text-stone-100 group-hover:text-yellow-600 transition-colors">Barbería Imperio</span>
           </Link>
 
           {/* Desktop Navigation */}

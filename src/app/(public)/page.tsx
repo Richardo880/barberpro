@@ -264,7 +264,7 @@ export default function HomePage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
+                
                 asChild
                 className="bg-yellow-700 hover:bg-yellow-800 text-yellow-50 shadow-lg"
               >

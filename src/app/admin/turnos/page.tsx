@@ -22,6 +22,7 @@ import { es } from "date-fns/locale";
 import { AppointmentStatus } from "@prisma/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { SortableHeader, useSortState } from "@/components/ui/sortable-header";
 
 const statusColors = {
   PENDING: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -45,6 +46,8 @@ export default function TurnosPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedStaff, setSelectedStaff] = useState<string>("all");
 
+  const { sortKey, sortDirection, handleSort, sortData } = useSortState<any>("fecha", "asc");
+
   const { data: staffData } = useStaff();
   const staff = staffData?.staff || [];
 
@@ -63,9 +66,15 @@ export default function TurnosPage() {
   const { data: appointmentsData, isLoading } = useAppointments(filterParams);
   const updateMutation = useUpdateAppointment();
 
-  const appointments = (appointmentsData?.appointments || []).sort(
-    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-  );
+  const sortedAppointments = sortData(appointmentsData?.appointments || [], {
+    fecha: (item) => new Date(item.startTime),
+    cliente: (item) => item.client?.name || "",
+    servicio: (item) => item.service?.name || "",
+    barbero: (item) => item.staff?.name || "ZZZ",
+    estado: (item) => item.status,
+  });
+
+  const appointments = sortedAppointments;
 
   const handleUpdateStatus = async (id: string, status: AppointmentStatus) => {
     try {
@@ -190,11 +199,51 @@ export default function TurnosPage() {
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Fecha/Hora</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Cliente</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Servicio</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Barbero</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Estado</th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Fecha/Hora"
+                        sortKey="fecha"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Cliente"
+                        sortKey="cliente"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Servicio"
+                        sortKey="servicio"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Barbero"
+                        sortKey="barbero"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Estado"
+                        sortKey="estado"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
                     <th className="px-4 py-3 text-right text-sm font-medium">Acciones</th>
                   </tr>
                 </thead>

@@ -12,17 +12,27 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/use-debounce";
+import { SortableHeader, useSortState } from "@/components/ui/sortable-header";
 
 export default function ClientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const { sortKey, sortDirection, handleSort, sortData } = useSortState<any>("nombre", "asc");
 
   const { data: clientsData, isLoading } = useClients({
     search: debouncedSearch || undefined,
     page: 1,
     limit: 50,
   });
-  const clients = clientsData?.clients || [];
+
+  const sortedClients = sortData(clientsData?.clients || [], {
+    nombre: (item) => item.name,
+    email: (item) => item.email,
+    turnos: (item) => item._count?.appointments || 0,
+    ultimoTurno: (item) => item.appointments?.[0]?.startTime ? new Date(item.appointments[0].startTime) : new Date(0),
+  });
+
+  const clients = sortedClients;
 
   return (
     <div className="space-y-6">
@@ -69,13 +79,41 @@ export default function ClientesPage() {
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Cliente</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Contacto</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">
-                      Total Turnos
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Cliente"
+                        sortKey="nombre"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">
-                      Último Turno
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Contacto"
+                        sortKey="email"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Total Turnos"
+                        sortKey="turnos"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <SortableHeader
+                        label="Último Turno"
+                        sortKey="ultimoTurno"
+                        currentSort={sortKey}
+                        currentDirection={sortDirection}
+                        onSort={handleSort}
+                      />
                     </th>
                     <th className="px-4 py-3 text-right text-sm font-medium">Acciones</th>
                   </tr>
