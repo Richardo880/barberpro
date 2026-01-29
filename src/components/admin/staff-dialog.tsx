@@ -36,7 +36,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
   const { toast } = useToast();
   const createMutation = useCreateStaff();
   const updateMutation = useUpdateStaff();
-  const { data: servicesData } = useServices(false);
+  const { data: servicesData } = useServices({ active: false });
   const services = servicesData?.services || [];
 
   const [formData, setFormData] = useState({

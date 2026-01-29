@@ -37,7 +37,7 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
   const { toast } = useToast();
   const createMutation = useCreateRecord();
   const updateMutation = useUpdateRecord();
-  const { data: servicesData } = useServices(true); // Solo servicios activos
+  const { data: servicesData } = useServices({ active: true }); // Solo servicios activos
 
   const [formData, setFormData] = useState({
     serviceId: "",

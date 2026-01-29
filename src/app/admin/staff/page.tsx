@@ -31,7 +31,7 @@ import { Users, Plus, Edit, Eye, EyeOff, Trash2 } from "lucide-react";
 
 export default function StaffPage() {
   const { toast } = useToast();
-  const { data: staffData, isLoading } = useStaff(true); // Incluir inactivos
+  const { data: staffData, isLoading } = useStaff({ includeInactive: true }); // Incluir inactivos
   const deleteMutation = useDeleteStaff();
   const staff = staffData?.staff || [];
 

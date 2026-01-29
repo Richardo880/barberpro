@@ -34,7 +34,14 @@ interface UpdateServiceData {
   isActive?: boolean;
 }
 
-export function useServices(active = true) {
+interface UseServicesOptions {
+  active?: boolean;
+  enabled?: boolean;
+}
+
+export function useServices(options: UseServicesOptions = {}) {
+  const { active = true, enabled = true } = options;
+
   return useQuery<ServicesResponse>({
     queryKey: ["services", { active }],
     queryFn: async () => {
@@ -49,7 +56,8 @@ export function useServices(active = true) {
 
       return response.json();
     },
-    staleTime: 10 * 60 * 1000, // 10 minutos (servicios cambian poco)
+    staleTime: 10 * 60 * 1000,
+    enabled,
   });
 }
 

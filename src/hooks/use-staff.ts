@@ -40,7 +40,14 @@ export interface UpdateStaffData {
   isActive?: boolean;
 }
 
-export function useStaff(includeInactive = false) {
+interface UseStaffOptions {
+  includeInactive?: boolean;
+  enabled?: boolean;
+}
+
+export function useStaff(options: UseStaffOptions = {}) {
+  const { includeInactive = false, enabled = true } = options;
+
   return useQuery<StaffResponse>({
     queryKey: ["staff", { includeInactive }],
     queryFn: async () => {
@@ -59,7 +66,8 @@ export function useStaff(includeInactive = false) {
 
       return response.json();
     },
-    staleTime: 10 * 60 * 1000, // 10 minutos (staff cambia poco)
+    staleTime: 10 * 60 * 1000,
+    enabled,
   });
 }
 

@@ -30,7 +30,7 @@ import { Scissors, Plus, Edit, Eye, EyeOff, Trash2 } from "lucide-react";
 
 export default function ServiciosPage() {
   const { toast } = useToast();
-  const { data: servicesData, isLoading } = useServices(false);
+  const { data: servicesData, isLoading } = useServices({ active: false });
   const deleteMutation = useDeleteService();
   const services = servicesData?.services || [];
 
