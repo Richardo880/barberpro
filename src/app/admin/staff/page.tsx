@@ -201,7 +201,7 @@ export default function StaffPage() {
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {member.specialties && member.specialties.length > 0 ? (
-                          member.specialties.slice(0, 3).map((specialty, idx) => (
+                          member.specialties.slice(0, 3).map((specialty: string, idx: number) => (
                             <Badge key={idx} variant="secondary" className="text-xs">
                               {specialty}
                             </Badge>

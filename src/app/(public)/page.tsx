@@ -28,9 +28,8 @@ function ServicesSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
-          className={`mb-12 text-center mx-auto max-w-2xl bg-gradient-to-br from-stone-900/90 to-stone-950/90 backdrop-blur-sm p-10 rounded-xl shadow-2xl border border-stone-700/40 ${
-            isInView ? "animate-fade-in-up" : "opacity-0"
-          }`}
+          className={`mb-12 text-center mx-auto max-w-2xl bg-gradient-to-br from-stone-900/90 to-stone-950/90 backdrop-blur-sm p-10 rounded-xl shadow-2xl border border-stone-700/40 ${isInView ? "animate-fade-in-up" : "opacity-0"
+            }`}
         >
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-stone-100">
             Nuestros Servicios
@@ -82,9 +81,8 @@ function FeaturesSection() {
           {features.map((feature, index) => (
             <Card
               key={feature.title}
-              className={`bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 ${
-                isInView ? "animate-fade-in-up" : "opacity-0"
-              }`}
+              className={`bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 ${isInView ? "animate-fade-in-up" : "opacity-0"
+                }`}
               style={{ animationDelay: isInView ? `${index * 100}ms` : undefined }}
             >
               <CardContent className="flex flex-col items-center pt-6 text-center">
@@ -120,9 +118,8 @@ function StaffSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
-          className={`mb-12 text-center mx-auto max-w-2xl bg-gradient-to-br from-stone-900/90 to-stone-950/90 backdrop-blur-sm p-10 rounded-xl shadow-2xl border border-stone-700/40 ${
-            isInView ? "animate-fade-in-up" : "opacity-0"
-          }`}
+          className={`mb-12 text-center mx-auto max-w-2xl bg-gradient-to-br from-stone-900/90 to-stone-950/90 backdrop-blur-sm p-10 rounded-xl shadow-2xl border border-stone-700/40 ${isInView ? "animate-fade-in-up" : "opacity-0"
+            }`}
         >
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-stone-100">
             Nuestro Equipo
@@ -154,9 +151,8 @@ function StaffSection() {
             {staff.map((member, index) => (
               <Card
                 key={member.id}
-                className={`w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] overflow-hidden bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 ${
-                  isInView ? "animate-fade-in-up" : "opacity-0"
-                }`}
+                className={`w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] overflow-hidden bg-gradient-to-br from-stone-900/85 to-stone-950/85 backdrop-blur-sm border-stone-700/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 ${isInView ? "animate-fade-in-up" : "opacity-0"
+                  }`}
                 style={{ animationDelay: `${(index + 1) * 100}ms` }}
               >
                 <CardContent className="p-6 text-center">
@@ -210,9 +206,8 @@ function CTASection() {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzAtMiAyLTQgNC00czQgMiA0IDQtMiA0LTQgNC00LTItNC00em0wIDQwYzAtMiAyLTQgNC00czQgMiA0IDQtMiA0LTQgNC00LTItNC00em0wLTIwYzAtMiAyLTQgNC00czQgMiA0IDQtMiA0LTQgNC00LTItNC00ek0xNiA0NGMwLTIgMi00IDQtNHM0IDIgNCA0LTIgNC00IDQtNC0yLTQtNHptMC00MGMwLTIgMi00IDQtNHM0IDIgNCA0LTIgNC00IDQtNC0yLTQtNHptMCAyMGMwLTIgMi00IDQtNHM0IDIgNCA0LTIgNC00IDQtNC0yLTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
 
       <div
-        className={`relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 ${
-          isInView ? "animate-fade-in-up" : "opacity-0"
-        }`}
+        className={`relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 ${isInView ? "animate-fade-in-up" : "opacity-0"
+          }`}
       >
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-stone-100">
           ¿Listo para tu próximo corte?
@@ -264,7 +259,6 @@ export default function HomePage() {
               </Button>
               <Button
                 size="lg"
-                
                 asChild
                 className="bg-yellow-700 hover:bg-yellow-800 text-yellow-50 shadow-lg"
               >

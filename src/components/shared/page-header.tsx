@@ -5,6 +5,8 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   action?: ReactNode;
+  icon?: React.ComponentType;
+  description?: string; // Add description as an optional prop
 }
 
 export function PageHeader({ title, subtitle, action }: PageHeaderProps) {
