@@ -66,15 +66,38 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { clientId, serviceId, staffId, date, price, notes, tags, photoUrls } = body;
+    const {
+      clientId,
+      serviceId,
+      staffId,
+      date,
+      price,
+      notes,
+      tags,
+      photoUrls,
+      originalPrice,
+      discountAmount,
+      promotionApplied,
+    } = body;
 
     // Validaciones básicas
-    if (!clientId || !serviceId || !date || !price) {
+    if (!clientId || !serviceId || !date || price === undefined) {
       return NextResponse.json(
         { error: "Faltan campos requeridos: clientId, serviceId, date, price" },
         { status: 400 }
       );
     }
+
+    // Obtener el precio del servicio para calcular campos de auditoría si no se proporcionan
+    const service = await prisma.service.findUnique({
+      where: { id: serviceId },
+      select: { price: true },
+    });
+
+    const servicePrice = service ? Number(service.price) : price;
+    const finalOriginalPrice = originalPrice ?? servicePrice;
+    const finalDiscountAmount = discountAmount ?? Math.max(0, finalOriginalPrice - price);
+    const finalPromotionApplied = promotionApplied ?? finalDiscountAmount > 0;
 
     const record = await prisma.haircutRecord.create({
       data: {
@@ -83,6 +106,9 @@ export async function POST(request: NextRequest) {
         staffId: staffId || session.user.id,
         date: new Date(date),
         price,
+        originalPrice: finalOriginalPrice,
+        discountAmount: finalDiscountAmount,
+        promotionApplied: finalPromotionApplied,
         notes: notes || null,
         tags: tags || [],
         photoUrls: photoUrls || [],

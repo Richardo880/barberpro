@@ -7,6 +7,7 @@ import {
   updateAppointmentAdminSchema,
 } from "@/lib/validations/appointment";
 import { addMinutes } from "date-fns";
+import { calculatePriceWithPromotion } from "@/server/services/promotion.service";
 
 export async function GET(
   _request: NextRequest,
@@ -167,13 +168,23 @@ export async function PATCH(
     // Si el estado cambió a COMPLETED, crear automáticamente un registro de corte
     if (updateData.status === "COMPLETED" && existingAppointment.status !== "COMPLETED") {
       try {
+        // Calcular precio considerando promociones del día del turno
+        const priceCalc = await calculatePriceWithPromotion(
+          Number(updated.service.price),
+          updated.serviceId,
+          updated.startTime
+        );
+
         await prisma.haircutRecord.create({
           data: {
             clientId: updated.clientId,
             serviceId: updated.serviceId,
             staffId: updated.staffId,
             date: updated.startTime,
-            price: updated.service.price,
+            price: priceCalc.finalPrice,
+            originalPrice: priceCalc.originalPrice,
+            discountAmount: priceCalc.discountAmount,
+            promotionApplied: priceCalc.promotionApplied,
             notes: updated.staffNotes || undefined,
             tags: [],
             photoUrls: [],

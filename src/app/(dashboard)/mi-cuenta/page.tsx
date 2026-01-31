@@ -30,6 +30,7 @@ import {
   User,
   AlertCircle,
   ImageIcon,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -376,8 +377,25 @@ export default function MiCuentaPage() {
                             </div>
                           )}
 
-                          <div className="text-lg font-bold text-primary">
-                            ${record.price}
+                          <div className="flex items-center gap-2">
+                            {record.promotionApplied ? (
+                              <>
+                                <span className="text-lg font-bold text-primary">
+                                  ₲{Number(record.price).toLocaleString("es-PY")}
+                                </span>
+                                <span className="text-sm text-muted-foreground line-through">
+                                  ₲{Number(record.originalPrice).toLocaleString("es-PY")}
+                                </span>
+                                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                                  <Tag className="mr-1 h-3 w-3" />
+                                  Promo
+                                </Badge>
+                              </>
+                            ) : (
+                              <span className="text-lg font-bold text-primary">
+                                ₲{Number(record.price).toLocaleString("es-PY")}
+                              </span>
+                            )}
                           </div>
 
                           {record.tags && record.tags.length > 0 && (

@@ -172,10 +172,15 @@ model HaircutRecord {
 
   // Detalles del servicio realizado
   date        DateTime
-  price       Decimal  @db.Decimal(10, 2) // Precio en ese momento (puede diferir del servicio)
+  price       Decimal  @db.Decimal(10, 2) // Precio final pagado (con descuento si aplica)
   notes       String?  // Notas del barbero
   tags        String[] // Ej: ["fade alto", "diseño estrella"]
   photoUrls   String[] // URLs de fotos del resultado
+
+  // Campos de auditoría para promociones
+  originalPrice    Decimal?  @db.Decimal(10, 2) // Precio original del servicio
+  discountAmount   Decimal?  @db.Decimal(10, 2) // Monto del descuento aplicado
+  promotionApplied Boolean   @default(false)    // Si se aplicó promoción
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
