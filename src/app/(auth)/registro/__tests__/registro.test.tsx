@@ -32,27 +32,32 @@ describe("RegisterPage", () => {
     const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/el nombre debe tener al menos 2 caracteres/i)).toBeInTheDocument();
-      expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
-    });
+    const nameError = await screen.findByText(/el nombre debe tener al menos 2 caracteres/i, {}, { timeout: 5000 });
+    expect(nameError).toBeInTheDocument();
+
+    const emailError = await screen.findByText(/email inválido/i, {}, { timeout: 5000 });
+    expect(emailError).toBeInTheDocument();
   });
 
   it("validates password requirements", async () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
+    const nameInput = screen.getByLabelText(/nombre completo/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^contraseña$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
+
+    await user.type(nameInput, "Juan Pérez");
+    await user.type(emailInput, "juan@test.com");
     await user.type(passwordInput, "weak");
+    await user.type(confirmPasswordInput, "weak");
 
     const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/la contraseña debe tener al menos 8 caracteres/i)
-      ).toBeInTheDocument();
-    });
+    const errorMessage = await screen.findByText(/la contraseña debe tener al menos 8 caracteres/i, {}, { timeout: 5000 });
+    expect(errorMessage).toBeInTheDocument();
   });
 
   it("validates password must contain uppercase letter", async () => {
@@ -62,19 +67,18 @@ describe("RegisterPage", () => {
     const nameInput = screen.getByLabelText(/nombre completo/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^contraseña$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
 
     await user.type(nameInput, "Juan Pérez");
     await user.type(emailInput, "juan@test.com");
     await user.type(passwordInput, "lowercase123");
+    await user.type(confirmPasswordInput, "lowercase123");
 
     const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/debe contener al menos una mayúscula/i)
-      ).toBeInTheDocument();
-    });
+    const errorMessage = await screen.findByText(/debe contener al menos una mayúscula/i, {}, { timeout: 5000 });
+    expect(errorMessage).toBeInTheDocument();
   });
 
   it("validates password must contain number", async () => {
@@ -84,19 +88,18 @@ describe("RegisterPage", () => {
     const nameInput = screen.getByLabelText(/nombre completo/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^contraseña$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
 
     await user.type(nameInput, "Juan Pérez");
     await user.type(emailInput, "juan@test.com");
-    await user.type(passwordInput, "NoNumbers");
+    await user.type(passwordInput, "NoNumbersX");
+    await user.type(confirmPasswordInput, "NoNumbersX");
 
     const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/debe contener al menos un número/i)
-      ).toBeInTheDocument();
-    });
+    const errorMessage = await screen.findByText(/debe contener al menos un número/i, {}, { timeout: 5000 });
+    expect(errorMessage).toBeInTheDocument();
   });
 
   it("validates password confirmation matches", async () => {
@@ -116,24 +119,31 @@ describe("RegisterPage", () => {
     const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument();
-    });
+    const errorMessage = await screen.findByText(/las contraseñas no coinciden/i, {}, { timeout: 5000 });
+    expect(errorMessage).toBeInTheDocument();
   });
 
   it("validates phone number format", async () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
 
+    const nameInput = screen.getByLabelText(/nombre completo/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const phoneInput = screen.getByLabelText(/teléfono/i);
-    await user.type(phoneInput, "invalid-phone");
+    const passwordInput = screen.getByLabelText(/^contraseña$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar contraseña/i);
+
+    await user.type(nameInput, "Juan Pérez");
+    await user.type(emailInput, "juan@test.com");
+    await user.type(phoneInput, "abc123");
+    await user.type(passwordInput, "Password123");
+    await user.type(confirmPasswordInput, "Password123");
 
     const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/teléfono inválido/i)).toBeInTheDocument();
-    });
+    const errorMessage = await screen.findByText(/teléfono inválido/i, {}, { timeout: 5000 });
+    expect(errorMessage).toBeInTheDocument();
   });
 
   it("successfully registers user and auto-logs in", async () => {

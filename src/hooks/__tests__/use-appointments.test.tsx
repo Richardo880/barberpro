@@ -251,15 +251,16 @@ describe("useAvailableSlots", () => {
       json: async () => mockAvailableSlots,
     } as Response);
 
-    const params = {
-      serviceId: "service-1",
-      date: "2024-03-15",
-      staffId: "staff-1",
-    };
+    const serviceId = "service-1";
+    const date = "2024-03-15";
+    const staffId = "staff-1";
 
-    const { result } = renderHook(() => useAvailableSlots(params), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useAvailableSlots(serviceId, date, staffId),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -272,7 +273,7 @@ describe("useAvailableSlots", () => {
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        body: JSON.stringify({ serviceId, staffId, date }),
       })
     );
   });
@@ -280,16 +281,9 @@ describe("useAvailableSlots", () => {
   it("does not fetch when required params are missing", () => {
     const mockFetch = vi.mocked(global.fetch);
 
-    const { result } = renderHook(
-      () =>
-        useAvailableSlots({
-          serviceId: "",
-          date: "",
-        }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useAvailableSlots("", ""), {
+      wrapper: createWrapper(),
+    });
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBeUndefined();
@@ -303,12 +297,10 @@ describe("useAvailableSlots", () => {
       json: async () => ({ error: "Error al obtener horarios" }),
     } as Response);
 
-    const params = {
-      serviceId: "service-1",
-      date: "2024-03-15",
-    };
+    const serviceId = "service-1";
+    const date = "2024-03-15";
 
-    const { result } = renderHook(() => useAvailableSlots(params), {
+    const { result } = renderHook(() => useAvailableSlots(serviceId, date), {
       wrapper: createWrapper(),
     });
 
@@ -326,15 +318,16 @@ describe("useAvailableSlots", () => {
       json: async () => mockAvailableSlots,
     } as Response);
 
-    const params = {
-      serviceId: "service-1",
-      staffId: "staff-1",
-      date: "2024-03-15",
-    };
+    const serviceId = "service-1";
+    const date = "2024-03-15";
+    const staffId = "staff-1";
 
-    const { result } = renderHook(() => useAvailableSlots(params), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useAvailableSlots(serviceId, date, staffId),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -343,7 +336,7 @@ describe("useAvailableSlots", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       "/api/appointments/available-slots",
       expect.objectContaining({
-        body: JSON.stringify(params),
+        body: JSON.stringify({ serviceId, staffId, date }),
       })
     );
   });

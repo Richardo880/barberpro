@@ -9,6 +9,10 @@ vi.mock("next-auth", () => ({
   getServerSession: vi.fn(),
 }));
 
+vi.mock("@/lib/auth", () => ({
+  authOptions: {},
+}));
+
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     appointment: {
@@ -113,10 +117,11 @@ describe("GET /api/appointments", () => {
     );
     await GET(request);
 
+    // Status is transformed to array by validation schema
     expect(prisma.appointment.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          status: "PENDING",
+          status: { in: ["PENDING"] },
         }),
       })
     );
@@ -224,7 +229,7 @@ describe("POST /api/appointments", () => {
 
     const appointmentData = {
       serviceId: mockServices[0].id,
-      staffId: "staff-1",
+      staffId: mockAppointment.staffId, // Use valid CUID from mockData
       startTime: new Date(Date.now() + 86400000).toISOString(),
       clientNotes: "Test notes",
     };
@@ -252,7 +257,7 @@ describe("POST /api/appointments", () => {
     const request = new NextRequest("http://localhost:3000/api/appointments", {
       method: "POST",
       body: JSON.stringify({
-        serviceId: "invalid-service",
+        serviceId: mockServices[0].id, // Use valid CUID format
         startTime: new Date().toISOString(),
       }),
     });
@@ -327,6 +332,7 @@ describe("POST /api/appointments", () => {
     vi.mocked(prisma.appointment.create).mockResolvedValueOnce({
       ...mockAppointment,
       staffId: null,
+      staff: null,
     } as any);
 
     const request = new NextRequest("http://localhost:3000/api/appointments", {
@@ -338,7 +344,6 @@ describe("POST /api/appointments", () => {
     });
 
     const response = await POST(request);
-    const data = await response.json();
 
     expect(response.status).toBe(201);
     expect(prisma.appointment.create).toHaveBeenCalledWith(
