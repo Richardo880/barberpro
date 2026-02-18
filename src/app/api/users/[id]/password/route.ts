@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionFromRequest } from "@/lib/auth-mobile";
 import { prisma } from "@/lib/prisma";
 import { changePasswordSchema } from "@/lib/validations/user";
 import bcrypt from "bcryptjs";
@@ -11,7 +10,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await getSessionFromRequest(request);
     if (!session?.user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }

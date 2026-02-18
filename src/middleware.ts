@@ -1,6 +1,7 @@
 /**
  * Next.js Middleware
  * Protege rutas y maneja autenticación/autorización
+ * Supports both NextAuth cookies (web) and Bearer tokens (mobile)
  */
 
 import { withAuth } from 'next-auth/middleware';
@@ -23,8 +24,21 @@ export default withAuth(
   },
   {
     callbacks: {
-      // Permitir acceso solo si está autenticado
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        // Public API endpoints that don't require auth
+        const publicPaths = ['/api/appointments/available-slots'];
+        if (publicPaths.includes(req.nextUrl.pathname)) {
+          return true;
+        }
+        // Mobile clients use Bearer tokens - let them through
+        // Route handlers verify the token via getSessionFromRequest()
+        const authHeader = req.headers.get('authorization');
+        if (authHeader?.startsWith('Bearer ')) {
+          return true;
+        }
+        // Web clients need a valid NextAuth session
+        return !!token;
+      },
     },
     pages: {
       signIn: '/login',
