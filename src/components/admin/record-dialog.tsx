@@ -23,7 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Tag } from "lucide-react";
+import { usePromotion, getDiscountedPrice } from "@/hooks/use-promotion";
+import { Badge } from "@/components/ui/badge";
 
 interface RecordDialogProps {
   open: boolean;
@@ -38,6 +40,8 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
   const createMutation = useCreateRecord();
   const updateMutation = useUpdateRecord();
   const { data: servicesData } = useServices({ active: true }); // Solo servicios activos
+  const { data: promoData } = usePromotion();
+  const promotion = promoData?.promotion;
 
   const [formData, setFormData] = useState({
     serviceId: "",
@@ -172,12 +176,16 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
           description: "El corte ha sido actualizado exitosamente",
         });
       } else {
-        // Modo creación
+        // Modo creación - calcular datos de promo
+        const promo = calculatePromoPrice(formData.serviceId, formData.date);
         await createMutation.mutateAsync({
           clientId,
           serviceId: formData.serviceId,
           date: new Date(formData.date).toISOString(),
           price: formData.price,
+          originalPrice: promo?.originalPrice ?? formData.price,
+          discountAmount: promo?.hasDiscount ? promo.originalPrice - promo.finalPrice : 0,
+          promotionApplied: promo?.hasDiscount ?? false,
           notes: formData.notes || undefined,
           tags,
           photoUrls: allPhotoUrls,
@@ -201,18 +209,33 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
     }
   };
 
-  const handleServiceChange = (serviceId: string) => {
-    setFormData({ ...formData, serviceId });
+  // Calcula el precio considerando promo para un servicio y fecha dados
+  const calculatePromoPrice = (serviceId: string, dateStr: string) => {
+    const service = services.find((s: any) => s.id === serviceId);
+    if (!service) return null;
+    const originalPrice = Number(service.price);
+    const date = new Date(dateStr + "T12:00:00"); // Evitar problemas de timezone
+    const { finalPrice, hasDiscount } = getDiscountedPrice(originalPrice, serviceId, promotion, date);
+    return { finalPrice, hasDiscount, originalPrice };
+  };
 
-    // Auto-fill price from service
-    const selectedService = services.find((s: any) => s.id === serviceId);
-    if (selectedService) {
-      setFormData((prev) => ({
-        ...prev,
-        serviceId,
-        price: Number(selectedService.price),
-      }));
-    }
+  const handleServiceChange = (serviceId: string) => {
+    const promo = calculatePromoPrice(serviceId, formData.date);
+    setFormData((prev) => ({
+      ...prev,
+      serviceId,
+      price: promo ? promo.finalPrice : prev.price,
+    }));
+  };
+
+  // Recalcular precio cuando cambia la fecha (si hay servicio seleccionado)
+  const handleDateChange = (dateStr: string) => {
+    const promo = formData.serviceId ? calculatePromoPrice(formData.serviceId, dateStr) : null;
+    setFormData((prev) => ({
+      ...prev,
+      date: dateStr,
+      price: promo ? promo.finalPrice : prev.price,
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -318,9 +341,7 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
                   id="date"
                   type="date"
                   value={formData.date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, date: e.target.value })
-                  }
+                  onChange={(e) => handleDateChange(e.target.value)}
                   disabled={isLoading}
                 />
                 {errors.date && (
@@ -330,7 +351,7 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
 
               <div className="space-y-2">
                 <Label htmlFor="price">
-                  Precio ($) <span className="text-red-500">*</span>
+                  Precio (₲) <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="price"
@@ -346,6 +367,23 @@ export function RecordDialog({ open, onOpenChange, clientId, clientName, record 
                   }
                   disabled={isLoading}
                 />
+                {(() => {
+                  const promo = formData.serviceId ? calculatePromoPrice(formData.serviceId, formData.date) : null;
+                  if (promo?.hasDiscount) {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          <Tag className="mr-1 h-3 w-3" />
+                          Promo aplicada
+                        </Badge>
+                        <span className="text-xs text-muted-foreground line-through">
+                          ₲ {promo.originalPrice.toLocaleString("es-PY")}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
                 {errors.price && (
                   <p className="text-sm text-red-500">{errors.price}</p>
                 )}

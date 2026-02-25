@@ -12,6 +12,9 @@ interface CreateRecordData {
   staffId?: string;
   date: string; // ISO date string
   price: number;
+  originalPrice?: number;
+  discountAmount?: number;
+  promotionApplied?: boolean;
   notes?: string;
   tags?: string[];
   photoUrls?: string[];
