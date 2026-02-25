@@ -463,7 +463,7 @@ function NuevaReservaContent() {
                         <p className="font-semibold">{selectedService.name}</p>
                         {(() => {
                           const numericPrice = typeof selectedService.price === "number" ? selectedService.price : parseFloat(String(selectedService.price));
-                          const { hasDiscount } = getDiscountedPrice(numericPrice, selectedService.id, promotion);
+                          const { hasDiscount } = getDiscountedPrice(numericPrice, selectedService.id, promotion, state.date!);
                           return hasDiscount ? (
                             <Badge variant="destructive" className="text-xs">
                               <Tag className="mr-1 h-3 w-3" />
@@ -474,7 +474,7 @@ function NuevaReservaContent() {
                       </div>
                       {(() => {
                         const numericPrice = typeof selectedService.price === "number" ? selectedService.price : parseFloat(String(selectedService.price));
-                        const { finalPrice, hasDiscount } = getDiscountedPrice(numericPrice, selectedService.id, promotion);
+                        const { finalPrice, hasDiscount } = getDiscountedPrice(numericPrice, selectedService.id, promotion, state.date!);
                         return (
                           <p className="text-sm text-muted-foreground">
                             {selectedService.duration} min -{" "}

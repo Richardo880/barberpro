@@ -69,12 +69,22 @@ export function isPromoActive(config: PromotionConfig | undefined): boolean {
   return today === config.day;
 }
 
+export function isPromoDayForDate(config: PromotionConfig | undefined, date: Date): boolean {
+  if (!config || !config.enabled) return false;
+  return date.getDay() === config.day;
+}
+
 export function getDiscountedPrice(
   originalPrice: number,
   serviceId: string,
-  config: PromotionConfig | undefined
+  config: PromotionConfig | undefined,
+  date?: Date
 ): { finalPrice: number; hasDiscount: boolean } {
-  if (!config || !isPromoActive(config)) {
+  const promoActive = date
+    ? isPromoDayForDate(config, date)
+    : isPromoActive(config);
+
+  if (!config || !promoActive) {
     return { finalPrice: originalPrice, hasDiscount: false };
   }
 
