@@ -40,6 +40,7 @@ export const STORAGE_BUCKETS = {
   RECORDS: 'records',
   SERVICES: 'services',
   STAFF: 'staff',
+  TRANSFERS: 'transfers',
 } as const;
 
 // Helper to get public URL for a file

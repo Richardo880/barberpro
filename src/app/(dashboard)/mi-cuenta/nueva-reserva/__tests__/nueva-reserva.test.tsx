@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@/test/test-utils";
+import { render, screen, waitFor } from "@/test/test-utils";
 import userEvent from "@testing-library/user-event";
 import NuevaReservaPage from "../page";
 import { mockServices, mockStaff, mockAvailableSlots } from "@/test/mockData";
@@ -38,7 +38,7 @@ describe("NuevaReservaPage - Booking Wizard Flow", () => {
     render(<NuevaReservaPage />);
 
     expect(screen.getByText(/nueva reserva/i)).toBeInTheDocument();
-    expect(screen.getByText(/paso 1 de 4/i)).toBeInTheDocument();
+    expect(screen.getByText(/paso 1 de 5/i)).toBeInTheDocument();
     expect(screen.getByText(/selecciona un servicio/i)).toBeInTheDocument();
     expect(screen.getByText(/corte de cabello/i)).toBeInTheDocument();
     expect(screen.getByText(/corte \+ barba/i)).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe("NuevaReservaPage - Booking Wizard Flow", () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/paso 2 de 4/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 2 de 5/i)).toBeInTheDocument();
       expect(screen.getByText(/elige tu barbero/i)).toBeInTheDocument();
     });
   });
@@ -100,7 +100,7 @@ describe("NuevaReservaPage - Booking Wizard Flow", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/paso 3 de 4/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 3 de 5/i)).toBeInTheDocument();
     });
   });
 
@@ -129,21 +129,21 @@ describe("NuevaReservaPage - Booking Wizard Flow", () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText(/paso 2 de 4/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 2 de 5/i)).toBeInTheDocument();
     });
 
     const backButton = screen.getByRole("button", { name: /atrás/i });
     await user.click(backButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/paso 1 de 4/i)).toBeInTheDocument();
+      expect(screen.getByText(/paso 1 de 5/i)).toBeInTheDocument();
     });
   });
 
   it("displays progress bar correctly", () => {
     render(<NuevaReservaPage />);
 
-    expect(screen.getByText(/25%/i)).toBeInTheDocument();
+    expect(screen.getByText(/20%/i)).toBeInTheDocument();
   });
 
   it("shows selected service info on subsequent steps", async () => {

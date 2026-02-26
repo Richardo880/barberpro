@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Filter, CheckCircle, XCircle, Clock } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Calendar as CalendarIcon, Filter, CheckCircle, XCircle, Clock, ImageIcon, ThumbsUp, ThumbsDown } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { AppointmentStatus } from "@prisma/client";
@@ -40,11 +46,24 @@ const statusLabels = {
   NO_SHOW: "No asistió",
 };
 
+const paymentStatusColors = {
+  PENDING: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  APPROVED: "bg-green-100 text-green-800 border-green-200",
+  REJECTED: "bg-red-100 text-red-800 border-red-200",
+};
+
+const paymentStatusLabels = {
+  PENDING: "Pendiente",
+  APPROVED: "Aprobado",
+  REJECTED: "Rechazado",
+};
+
 export default function TurnosPage() {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedStaff, setSelectedStaff] = useState<string>("all");
+  const [proofDialogUrl, setProofDialogUrl] = useState<string | null>(null);
 
   const { sortKey, sortDirection, handleSort, sortData } = useSortState<any>("fecha", "asc");
 
@@ -87,6 +106,22 @@ export default function TurnosPage() {
       toast({
         title: "Error",
         description: "No se pudo actualizar el turno",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdatePaymentStatus = async (id: string, paymentStatus: string) => {
+    try {
+      await updateMutation.mutateAsync({ id, data: { paymentStatus } });
+      toast({
+        title: "Pago actualizado",
+        description: paymentStatus === "APPROVED" ? "Comprobante aprobado" : "Comprobante rechazado",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado del pago",
         variant: "destructive",
       });
     }
@@ -244,6 +279,7 @@ export default function TurnosPage() {
                         onSort={handleSort}
                       />
                     </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">Pago</th>
                     <th className="px-4 py-3 text-right text-sm font-medium">Acciones</th>
                   </tr>
                 </thead>
@@ -288,6 +324,56 @@ export default function TurnosPage() {
                         >
                           {statusLabels[appointment.status as keyof typeof statusLabels]}
                         </Badge>
+                      </td>
+                      {/* Payment Status Column */}
+                      <td className="px-4 py-4">
+                        {appointment.paymentProofUrl ? (
+                          <div className="flex flex-col gap-1">
+                            <button
+                              onClick={() => setProofDialogUrl(appointment.paymentProofUrl!)}
+                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            >
+                              <ImageIcon className="h-3 w-3" />
+                              Ver comprobante
+                            </button>
+                            <Badge
+                              variant="outline"
+                              className={
+                                paymentStatusColors[
+                                  (appointment.paymentStatus || "PENDING") as keyof typeof paymentStatusColors
+                                ]
+                              }
+                            >
+                              {paymentStatusLabels[(appointment.paymentStatus || "PENDING") as keyof typeof paymentStatusLabels]}
+                            </Badge>
+                            {(appointment.paymentStatus === "PENDING" || !appointment.paymentStatus) && (
+                              <div className="flex gap-1 mt-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 px-2"
+                                  onClick={() => handleUpdatePaymentStatus(appointment.id, "APPROVED")}
+                                  disabled={updateMutation.isPending}
+                                  title="Aprobar pago"
+                                >
+                                  <ThumbsUp className="h-3.5 w-3.5 text-green-600" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 px-2"
+                                  onClick={() => handleUpdatePaymentStatus(appointment.id, "REJECTED")}
+                                  disabled={updateMutation.isPending}
+                                  title="Rechazar pago"
+                                >
+                                  <ThumbsDown className="h-3.5 w-3.5 text-red-600" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Sin comprobante</span>
+                        )}
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex justify-end gap-1">
@@ -355,6 +441,24 @@ export default function TurnosPage() {
           Mostrando {appointments.length} de {appointmentsData.total} turnos
         </div>
       )}
+
+      {/* Dialog para ver comprobante */}
+      <Dialog open={!!proofDialogUrl} onOpenChange={() => setProofDialogUrl(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Comprobante de transferencia</DialogTitle>
+          </DialogHeader>
+          {proofDialogUrl && (
+            <div className="rounded-lg overflow-hidden border">
+              <img
+                src={proofDialogUrl}
+                alt="Comprobante de pago"
+                className="w-full object-contain max-h-[70vh]"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

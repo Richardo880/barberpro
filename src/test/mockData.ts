@@ -75,6 +75,8 @@ export const mockAppointment = {
   status: "PENDING" as const,
   clientNotes: "Corte degradado",
   staffNotes: null,
+  paymentProofUrl: null,
+  paymentStatus: "PENDING" as const,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   client: mockUser,

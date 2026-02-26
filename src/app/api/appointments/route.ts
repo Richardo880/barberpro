@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { serviceId, staffId, startTime, clientNotes } = validated.data;
+    const { serviceId, staffId, startTime, clientNotes, paymentProofUrl } = validated.data;
 
     // Obtener duración del servicio
     const service = await prisma.service.findUnique({
@@ -194,6 +194,7 @@ export async function POST(request: NextRequest) {
         startTime: startDate,
         endTime: endDate,
         clientNotes: clientNotes || null,
+        paymentProofUrl: paymentProofUrl || null,
         status: "PENDING",
       },
       include: {

@@ -23,6 +23,7 @@ export const createAppointmentSchema = z.object({
     .string()
     .max(500, { message: 'Las notas no pueden exceder 500 caracteres' })
     .optional(),
+  paymentProofUrl: z.string().url({ message: 'URL de comprobante inválida' }).optional(),
 });
 
 // Schema para actualizar appointment (cliente)
@@ -43,6 +44,7 @@ export const updateAppointmentAdminSchema = z.object({
   startTime: z.string().datetime().optional(),
   clientNotes: z.string().max(500).optional(),
   staffNotes: z.string().max(1000).optional(),
+  paymentStatus: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
 });
 
 // Schema para query params de appointments

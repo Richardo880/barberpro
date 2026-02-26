@@ -10,6 +10,8 @@ export interface Appointment {
   status: string;
   clientNotes?: string | null;
   staffNotes?: string | null;
+  paymentProofUrl?: string | null;
+  paymentStatus?: string;
   service: {
     id: string;
     name: string;
@@ -63,6 +65,7 @@ interface CreateAppointmentData {
   staffId?: string | null;
   startTime: string;
   clientNotes?: string;
+  paymentProofUrl?: string;
 }
 
 interface UpdateAppointmentData {
@@ -71,6 +74,7 @@ interface UpdateAppointmentData {
   startTime?: string;
   clientNotes?: string;
   staffNotes?: string;
+  paymentStatus?: string;
 }
 
 export function useAppointments(params?: AppointmentQueryParams) {

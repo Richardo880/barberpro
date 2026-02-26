@@ -119,6 +119,12 @@ enum AppointmentStatus {
   NO_SHOW    // Cliente no se presentó
 }
 
+enum PaymentStatus {
+  PENDING    // Comprobante pendiente de revisión
+  APPROVED   // Comprobante aprobado por admin
+  REJECTED   // Comprobante rechazado por admin
+}
+
 model Appointment {
   id            String            @id @default(cuid())
 
@@ -142,6 +148,10 @@ model Appointment {
   // Notas
   clientNotes   String?           // Notas del cliente
   staffNotes    String?           // Notas del staff (solo admin/staff ven)
+
+  // Comprobante de pago
+  paymentProofUrl String?         // URL del comprobante de transferencia
+  paymentStatus   PaymentStatus   @default(PENDING) // Estado del comprobante
 
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt

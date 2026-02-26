@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useServices } from "@/hooks/use-services";
 import { useStaff } from "@/hooks/use-staff";
@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2, Loader2 as Loader2Icon } from "lucide-react";
+import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2, Loader2 as Loader2Icon, Upload, X, CreditCard, ImageIcon } from "lucide-react";
 import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -33,8 +33,11 @@ interface WizardState {
   staffId: string | null;
   date: Date | null;
   timeSlot: string | null;
+  paymentProofUrl: string | null;
   notes: string;
 }
+
+const TOTAL_STEPS = 5;
 
 function NuevaReservaContent() {
   const router = useRouter();
@@ -43,11 +46,15 @@ function NuevaReservaContent() {
 
   const [step, setStep] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<WizardState>({
     serviceId: searchParams.get("service"),
     staffId: searchParams.get("staff"),
     date: null,
     timeSlot: null,
+    paymentProofUrl: null,
     notes: "",
   });
 
@@ -102,8 +109,83 @@ function NuevaReservaContent() {
     if (step > 1) setStep(step - 1);
   };
 
+  // Calcular precio para mostrar en datos bancarios
+  const getServicePrice = () => {
+    if (!selectedService) return 0;
+    const numericPrice = typeof selectedService.price === "number" ? selectedService.price : parseFloat(String(selectedService.price));
+    const { finalPrice } = getDiscountedPrice(numericPrice, selectedService.id, promotion, state.date || undefined);
+    return finalPrice;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Archivo no válido",
+        description: "Solo se permiten archivos de imagen",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Archivo muy grande",
+        description: "El archivo no puede superar 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Preview local
+    const reader = new FileReader();
+    reader.onload = (ev) => setProofPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+
+    // Upload
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload/transfers", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Error al subir comprobante");
+      }
+
+      const data = await response.json();
+      setState((prev) => ({ ...prev, paymentProofUrl: data.url }));
+      toast({
+        title: "Comprobante subido",
+        description: "La imagen se subió correctamente",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error al subir",
+        description: error.message || "No se pudo subir el comprobante",
+        variant: "destructive",
+      });
+      setProofPreview(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveProof = () => {
+    setState((prev) => ({ ...prev, paymentProofUrl: null }));
+    setProofPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = async () => {
-    if (!state.serviceId || !state.date || !state.timeSlot) {
+    if (!state.serviceId || !state.date || !state.timeSlot || !state.paymentProofUrl) {
       toast({
         title: "Error",
         description: "Por favor completa todos los pasos",
@@ -122,6 +204,7 @@ function NuevaReservaContent() {
         staffId: state.staffId || undefined,
         startTime: appointmentDate.toISOString(),
         clientNotes: state.notes || undefined,
+        paymentProofUrl: state.paymentProofUrl,
       });
 
       // Mostrar popup de confirmación
@@ -140,7 +223,7 @@ function NuevaReservaContent() {
     router.push("/mi-cuenta/reservas");
   };
 
-  const progress = (step / 4) * 100;
+  const progress = (step / TOTAL_STEPS) * 100;
   const today = startOfDay(new Date());
 
   return (
@@ -154,7 +237,7 @@ function NuevaReservaContent() {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            Paso {step} de 4
+            Paso {step} de {TOTAL_STEPS}
           </span>
           <span className="font-medium">{progress.toFixed(0)}%</span>
         </div>
@@ -429,9 +512,141 @@ function NuevaReservaContent() {
         )
       }
 
-      {/* Step 4: Confirmation */}
+      {/* Step 4: Payment Proof Upload */}
       {
         step === 4 && selectedService && state.date && state.timeSlot && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Comprobante de pago</h2>
+              <Button variant="outline" size="sm" onClick={handleBack}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Atrás
+              </Button>
+            </div>
+
+            {/* Datos bancarios */}
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Datos para transferencia</h3>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  Realiza la transferencia con los siguientes datos y luego sube el comprobante.
+                </p>
+
+                <div className="rounded-lg border bg-muted/50 p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Banco:</span>
+                    <span className="font-medium">Banco Continental</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Titular:</span>
+                    <span className="font-medium">Juan Antonio García López</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Cédula:</span>
+                    <span className="font-medium">4.567.890</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Nro. Cuenta:</span>
+                    <span className="font-medium">123-456789-001</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="text-muted-foreground">Monto a transferir:</span>
+                    <span className="font-semibold text-primary">
+                      ₲ {getServicePrice().toLocaleString("es-PY")}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Upload comprobante */}
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Subir comprobante</h3>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+
+                {proofPreview ? (
+                  <div className="space-y-3">
+                    <div className="relative rounded-lg overflow-hidden border">
+                      <img
+                        src={proofPreview}
+                        alt="Comprobante de pago"
+                        className="w-full max-h-80 object-contain bg-muted/30"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8"
+                        onClick={handleRemoveProof}
+                        disabled={uploading}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {uploading && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2Icon className="h-4 w-4 animate-spin" />
+                        Subiendo comprobante...
+                      </div>
+                    )}
+                    {state.paymentProofUrl && (
+                      <p className="text-sm text-green-600 flex items-center gap-1">
+                        <Check className="h-4 w-4" />
+                        Comprobante subido correctamente
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 text-center hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer"
+                  >
+                    <Upload className="mx-auto h-10 w-10 text-muted-foreground/50" />
+                    <p className="mt-2 text-sm font-medium">
+                      Haz clic para subir el comprobante
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Imagen JPG, PNG o WEBP (máx. 5MB)
+                    </p>
+                  </button>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="flex gap-3">
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={() => setStep(5)}
+                disabled={!state.paymentProofUrl || uploading}
+              >
+                Continuar
+                <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
+              </Button>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Step 5: Confirmation */}
+      {
+        step === 5 && selectedService && state.date && state.timeSlot && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Confirma tu reserva</h2>
@@ -512,6 +727,14 @@ function NuevaReservaContent() {
                       </div>
                     </div>
                   )}
+
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="mt-1 h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-semibold">Comprobante adjunto</p>
+                      <p className="text-sm text-green-600">Pendiente de verificación</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -586,7 +809,7 @@ function NuevaReservaContent() {
               )}
 
               <p className="text-sm text-muted-foreground">
-                Recibirás un recordatorio antes de tu cita.
+                Tu comprobante será verificado por el equipo. Recibirás confirmación pronto.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
