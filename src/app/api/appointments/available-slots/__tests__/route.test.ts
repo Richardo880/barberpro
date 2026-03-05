@@ -53,8 +53,9 @@ describe("POST /api/appointments/available-slots", () => {
 
     expect(response.status).toBe(200);
     expect(data.slots).toHaveLength(3);
+    // UTC 12:00 = Paraguay 09:00 (UTC-3 in January/summer)
     expect(data.slots[0]).toEqual({
-      time: "12:00",
+      time: "09:00",
       start: "2025-01-01T12:00:00.000Z",
       end: "2025-01-01T12:30:00.000Z",
       available: true,

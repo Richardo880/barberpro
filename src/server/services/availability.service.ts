@@ -142,22 +142,12 @@ export class AvailabilityService {
       }
 
       // Verificar conflictos con turnos existentes
+      // Dos rangos [slotStart, slotEnd) y [aptStart, aptEnd + buffer) se solapan
+      // si slotStart < aptEnd+buffer AND aptStart < slotEnd (comparación estricta)
       const hasConflict = existingAppointments.some((apt) => {
-        const aptStartWithBuffer = addMinutes(apt.startTime, -bufferMinutes);
         const aptEndWithBuffer = addMinutes(apt.endTime, bufferMinutes);
 
-        // Solapamiento completo
-        return (
-          isWithinInterval(slot.start, {
-            start: aptStartWithBuffer,
-            end: aptEndWithBuffer,
-          }) ||
-          isWithinInterval(slot.end, {
-            start: aptStartWithBuffer,
-            end: aptEndWithBuffer,
-          }) ||
-          isWithinInterval(aptStartWithBuffer, { start: slot.start, end: slot.end })
-        );
+        return isBefore(slot.start, aptEndWithBuffer) && isBefore(apt.startTime, slot.end);
       });
 
       if (hasConflict) {

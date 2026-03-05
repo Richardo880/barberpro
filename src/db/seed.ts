@@ -211,12 +211,12 @@ async function main() {
   console.log('\n⏰ Configurando horarios de atención...');
 
   const businessHoursData = [
-    { dayOfWeek: DayOfWeek.MONDAY, isOpen: true, openTime: '09:00', closeTime: '18:00' },
-    { dayOfWeek: DayOfWeek.TUESDAY, isOpen: true, openTime: '09:00', closeTime: '18:00' },
-    { dayOfWeek: DayOfWeek.WEDNESDAY, isOpen: true, openTime: '09:00', closeTime: '18:00' },
-    { dayOfWeek: DayOfWeek.THURSDAY, isOpen: true, openTime: '09:00', closeTime: '18:00' },
-    { dayOfWeek: DayOfWeek.FRIDAY, isOpen: true, openTime: '09:00', closeTime: '19:00' },
-    { dayOfWeek: DayOfWeek.SATURDAY, isOpen: true, openTime: '08:00', closeTime: '14:00' },
+    { dayOfWeek: DayOfWeek.MONDAY, isOpen: true, openTime: '09:00', closeTime: '21:00' },
+    { dayOfWeek: DayOfWeek.TUESDAY, isOpen: true, openTime: '09:00', closeTime: '21:00' },
+    { dayOfWeek: DayOfWeek.WEDNESDAY, isOpen: true, openTime: '09:00', closeTime: '21:00' },
+    { dayOfWeek: DayOfWeek.THURSDAY, isOpen: true, openTime: '09:00', closeTime: '21:00' },
+    { dayOfWeek: DayOfWeek.FRIDAY, isOpen: true, openTime: '09:00', closeTime: '21:00' },
+    { dayOfWeek: DayOfWeek.SATURDAY, isOpen: true, openTime: '09:00', closeTime: '21:00' },
     { dayOfWeek: DayOfWeek.SUNDAY, isOpen: false, openTime: '00:00', closeTime: '00:00' },
   ];
 

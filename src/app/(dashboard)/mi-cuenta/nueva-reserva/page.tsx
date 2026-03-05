@@ -21,8 +21,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ArrowLeft, Check, Clock, Scissors, User, Calendar as CalendarIcon, CheckCircle2, Loader2 as Loader2Icon, Upload, X, CreditCard, ImageIcon } from "lucide-react";
-import { format, startOfDay } from "date-fns";
+import { format, startOfDay, parse } from "date-fns";
 import { es } from "date-fns/locale";
+import { fromZonedTime } from "date-fns-tz";
 import { useToast } from "@/hooks/use-toast";
 import { usePromotion, getDiscountedPrice } from "@/hooks/use-promotion";
 import { Badge } from "@/components/ui/badge";
@@ -195,14 +196,19 @@ function NuevaReservaContent() {
     }
 
     try {
-      const [hours, minutes] = state.timeSlot.split(":").map(Number);
-      const appointmentDate = new Date(state.date);
-      appointmentDate.setHours(hours, minutes, 0, 0);
+      // Construir fecha+hora en timezone Paraguay y convertir a UTC
+      const dateStr = format(state.date, 'yyyy-MM-dd');
+      const localDateTime = parse(
+        `${dateStr} ${state.timeSlot}`,
+        'yyyy-MM-dd HH:mm',
+        new Date()
+      );
+      const startTimeUTC = fromZonedTime(localDateTime, 'America/Asuncion');
 
       await createMutation.mutateAsync({
         serviceId: state.serviceId,
         staffId: state.staffId || undefined,
-        startTime: appointmentDate.toISOString(),
+        startTime: startTimeUTC.toISOString(),
         clientNotes: state.notes || undefined,
         paymentProofUrl: state.paymentProofUrl,
       });

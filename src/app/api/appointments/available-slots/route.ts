@@ -6,6 +6,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AvailabilityService } from '@/server/services/availability.service';
 import { z } from 'zod';
+import { toZonedTime } from 'date-fns-tz';
+import { format } from 'date-fns';
+
+const TIMEZONE = 'America/Asuncion';
 
 const requestSchema = z.object({
   serviceId: z.string().cuid(),
@@ -42,8 +46,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       slots: slots.map((slot) => {
-        // Extraer solo la hora en formato HH:mm
-        const timeStr = slot.start.toISOString().split('T')[1].slice(0, 5);
+        // Convertir UTC a hora Paraguay para mostrar al usuario
+        const zonedStart = toZonedTime(slot.start, TIMEZONE);
+        const timeStr = format(zonedStart, 'HH:mm');
         return {
           time: timeStr,
           start: slot.start.toISOString(),
