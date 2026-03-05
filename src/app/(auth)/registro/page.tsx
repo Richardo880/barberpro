@@ -128,7 +128,7 @@ export default function RegisterPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">Crear Cuenta</CardTitle>
         <CardDescription>
-          Completa los datos para crear tu cuenta en BarberPro
+          Completa los datos para crear tu cuenta en Barbería Imperio
         </CardDescription>
       </CardHeader>
       <CardContent>

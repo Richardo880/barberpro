@@ -10,9 +10,9 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <span className="font-bold">BP</span>
+                <span className="font-bold">BI</span>
               </div>
-              <span className="text-lg font-bold">BarberPro</span>
+              <span className="text-lg font-bold">Barbería Imperio</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Tu barbería de confianza. Estilo y profesionalismo en cada corte.
@@ -44,15 +44,15 @@ export function Footer() {
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>+595 21 123 4567</span>
+                <span>+595 994 625345</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>info@barberpro.com</span>
+                <span>info@barberiaimperio.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Asunción, Paraguay</span>
+                <span>San Lorenzo, Paraguay</span>
               </div>
             </div>
           </div>
@@ -84,7 +84,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} BarberPro. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Barbería Imperio. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

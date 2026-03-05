@@ -9,9 +9,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <span className="font-bold">BP</span>
+              <span className="font-bold">BI</span>
             </div>
-            <span className="text-xl font-bold">BarberPro</span>
+            <span className="text-xl font-bold">Barbería Imperio</span>
           </Link>
         </div>
       </div>

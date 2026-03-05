@@ -533,25 +533,25 @@ function NuevaReservaContent() {
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Realiza la transferencia con los siguientes datos y luego sube el comprobante.
+                  Realiza la transferencia con los siguientes datos y luego sube el comprobante o envialo al siguiente numero: +595 994 625345.
                 </p>
 
                 <div className="rounded-lg border bg-muted/50 p-4 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Banco:</span>
-                    <span className="font-medium">Banco Continental</span>
+                    <span className="font-medium">Ueno Bank</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Titular:</span>
-                    <span className="font-medium">Juan Antonio García López</span>
+                    <span className="font-medium">Edgar Cohene</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cédula:</span>
-                    <span className="font-medium">4.567.890</span>
+                    <span className="text-muted-foreground">Alias:</span>
+                    <span className="font-medium">5741753</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Nro. Cuenta:</span>
-                    <span className="font-medium">123-456789-001</span>
+                    <span className="font-medium">18147097</span>
                   </div>
                   <div className="flex justify-between border-t pt-2 mt-2">
                     <span className="text-muted-foreground">Monto a transferir:</span>
