@@ -10,7 +10,6 @@ import {
   parse,
   isBefore,
   isAfter,
-  isWithinInterval,
   startOfDay,
   endOfDay,
 } from 'date-fns';
